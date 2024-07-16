@@ -15,11 +15,6 @@ from utils import get_config_attrs, verify_date_argument, \
 # serpapi collector
 from serpapi_client import SerpAPICollector
 
-
-# DATABASE
-from databases import SQLDatabaseManager
-
-
 if __name__ == '__main__':
 
     '''
@@ -202,7 +197,7 @@ if __name__ == '__main__':
     > SerpAPI call
     '''
     print ('\n' + ' '.join(log_text.split()).strip())
-    serp_api_collector.api_call()
+    print (serp_api_collector.collect_image_thumbnails())
 
     # End process
     log_text = f'''

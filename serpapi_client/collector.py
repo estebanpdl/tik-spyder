@@ -9,7 +9,7 @@ from typing import Dict
 
 # SerpAPI utilities
 from .utilities import search_query, select_serpapi_parameters, \
-    get_serpapi_response_keys
+    extract_search_result_keys
 
 # SerpAPI module
 import serpapi
@@ -57,39 +57,43 @@ class SerpAPICollector:
         # database connection
         self.sql_database = SQLDatabaseManager(self.output)
     
-    def api_call(self) -> None:
+    def collect_search_results(self) -> None:
         '''
         Makes an API call to SerpAPI and processes the response data.
 
         Fetches data based on the initialized parameters and handles pagination
         to retrieve data from all available pages.
         '''
-        print (f'\nSearch query:\n{self.query}')
+        print (f'\nAPI call to Google search results:\n> {self.query}')
         try:
             api_response = self.client.search(self.parameters)
-            print ('\n...Processing')
+            print ('\n...Searching')
 
-            # process data
-            self._process_response_data(api_response.data)
+            # process search results
+            self._process_search_results(api_response.data)
 
             # get next page
             next_page = api_response.next_page_url
             while next_page:
                 next_response = api_response.next_page()
 
-                # process data
-                self._process_response_data(next_response.data)
+                # process search results
+                self._process_search_results(next_response.data)
 
+                # get next page
                 next_page = next_response.next_page_url
 
                 # update api_response for the next iteration
                 api_response = next_response
                 time.sleep(2)
+            
+            # api call status
+            print ('> Done')
         
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
     
-    def _process_response_data(self, data: Dict) -> None:
+    def _process_search_results(self, data: Dict) -> None:
         '''
         Processes the response data from SerpAPI, extracting organic results
         and inserting them into the SQL database.
@@ -100,7 +104,7 @@ class SerpAPICollector:
         field = 'organic_results'
         results = data.get(field, [])
         if results:
-            d = get_serpapi_response_keys(results)
+            d = extract_search_result_keys(results)
             
             # write results in SQL database
             if d:
@@ -108,17 +112,61 @@ class SerpAPICollector:
         else:
             print ('No organic results found in the response.')
 
-    def thumbnails_collector(self) -> None:
+    def collect_image_thumbnails(self) -> None:
         '''
+        Makes an API call to SerpAPI to collect image thumbnails from Google
+        Images.
         '''
+        # Google Images API
         self.parameters['tbm'] = 'isch'
 
-    def related_content_links(self) -> None:
+        # collect images
+        print (f'\nAPI call to Google images')
+
+        try:
+            api_response = self.client.search(self.parameters)
+            print ('\n...Searching for thumbnails')
+
+            # process image results
+            self.collect_image_thumbnails(api_response.data)
+
+            # get next page
+            next_page = api_response.next_page_url
+            while next_page:
+                next_response = api_response.next_page()
+
+                # process image results
+                self._process_image_results(next_response.data)
+
+                # get next page
+                next_page = next_response.next_page_url
+
+                # update api_response for the next iteration
+                api_response = next_response
+                time.sleep(2)
+
+            # api call status
+            print ('> Done')
+
+        except Exception as e:
+            print (f'An error occurred during the API call: {e}')
+    
+    def _process_image_results(self, data: Dict) -> None:
+        '''
+        Processes the response data from SerpAPI, extracting thumbnails
+        and inserting related data into the SQL database.
+
+        :param data: SerpAPI raw data response
+        '''
+
+        pass
+
+    def _collect_related_content(self) -> None:
         '''
         '''
         pass
 
-    def run(self) -> None:
+    def collect_search_data(self) -> None:
         '''
         '''
-        return self.parameters
+        pass

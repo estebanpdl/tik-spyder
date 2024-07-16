@@ -79,7 +79,7 @@ def select_serpapi_parameters(args: Dict) -> Dict:
 Get default keys from SerpAPI response
 
 '''
-def get_serpapi_response_keys(data: List[Dict]) -> List[Dict]:
+def extract_search_result_keys(data: List[Dict]) -> List[Dict]:
     '''
     Filters the SerpAPI response data to include only entries with 'link'
     containing 'video', and returns a list of dictionaries with specified
