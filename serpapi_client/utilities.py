@@ -35,7 +35,7 @@ def search_query(args: Dict) -> str:
     :param args: Dictionary containing the command line arguments and options.
     :return: A formatted query string.
     '''
-    q = args.get('query', '')
+    q = args.get('q', '')
     advanced_search = advanced_search_options(args)
 
     return f'{q} {advanced_search}'.strip()
@@ -54,7 +54,8 @@ def select_serpapi_parameters(args: Dict) -> Dict:
     :return: A dictionary containing only the relevant SerpAPI parameters.
     '''
     default_serpapi_parameters = [
-        'query',
+        'engine',
+        'q',
         'google_domain',
         'gl',
         'hl',
@@ -63,9 +64,15 @@ def select_serpapi_parameters(args: Dict) -> Dict:
     ]
 
     # filter and return only the relevant SerpAPI parameters
-    return {
+    params = {
         k: v for k, v in args.items() if k in default_serpapi_parameters and v 
     }
+
+    # add new parameters
+    params['start'] = 0
+    params['num'] = 100
+
+    return params
 
 
 '''

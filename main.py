@@ -55,12 +55,20 @@ if __name__ == '__main__':
 
     ''' query '''
     serpapi_arguments.add_argument(
-        '-q',
-        '--query',
+        '--q',
         type=str,
         required=True,
         metavar='',
         help='The search term of phrase for which to retrieve TikTok data.'
+    )
+
+    ''' engine '''
+    serpapi_arguments.add_argument(
+        '--engine',
+        type=str,
+        required=False,
+        default='google',
+        help='SerpAPI engine'
     )
 
     ''' google domain '''

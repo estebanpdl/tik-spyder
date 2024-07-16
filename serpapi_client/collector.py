@@ -46,7 +46,7 @@ class SerpAPICollector:
         self.query = f'site:{self.site}/* {q}'
 
         # update the query parameter in args
-        args['query'] = self.query
+        args['q'] = self.query
 
         # store the parameters
         self.parameters = select_serpapi_parameters(args)
@@ -81,6 +81,9 @@ class SerpAPICollector:
                 self._process_response_data(next_response.data)
 
                 next_page = next_response.next_page_url
+
+                # update api_response for the next iteration
+                api_response = next_response
                 time.sleep(2)
         
         except Exception as e:
