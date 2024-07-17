@@ -197,7 +197,7 @@ if __name__ == '__main__':
     > SerpAPI call
     '''
     print ('\n' + ' '.join(log_text.split()).strip())
-    print (serp_api_collector.collect_image_thumbnails())
+    serp_api_collector.collect_image_thumbnails()
 
     # End process
     log_text = f'''

@@ -76,29 +76,41 @@ def select_serpapi_parameters(args: Dict) -> Dict:
 
 
 '''
-Get default keys from SerpAPI response
+Extract relevant keys from SerpAPI response
 
 '''
-def extract_search_result_keys(data: List[Dict]) -> List[Dict]:
+def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
     '''
     Filters the SerpAPI response data to include only entries with 'link'
     containing 'video', and returns a list of dictionaries with specified
     default keys.
 
     :param data: List of dictionaries containing the SerpAPI response data.
+    :param result_type: Type of SerpAPI response: 'search_result' or
+        'images_result'
     :return: A list of dictionaries, each containing the specified default
         keys from the SerpAPI response.
     '''
-    default_keys = [
-        'source',
-        'title',
-        'snippet',
-        'link',
-        'thumbnail',
-        'video_link',
-        'snippet_highlighted_words',
-        'displayed_link'
-    ]
+    key_mapping = {
+        'search_result': [
+            'source',
+            'title',
+            'snippet',
+            'link',
+            'thumbnail',
+            'video_link',
+            'snippet_highlighted_words',
+            'displayed_link'
+        ],
+        'images_result': [
+            'source',
+            'thumbnail',
+            'title',
+            'link'
+        ]
+    }
+
+    selected_keys = key_mapping.get(result_type, [])
 
     # filter data to include only entries with 'link' containing 'video'
     d = [i for i in data if 'link' in i and 'video' in i['link']]
@@ -106,6 +118,6 @@ def extract_search_result_keys(data: List[Dict]) -> List[Dict]:
     # return list of dictionaries with specified default keys
     return [
         {
-            k: i[k] for k in default_keys if k in i
+            k: i[k] for k in selected_keys if k in i
         } for i in d
     ]

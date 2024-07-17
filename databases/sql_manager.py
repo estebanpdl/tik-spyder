@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # import modules
-import os
-import time
-import json
 import sqlite3
 
 # SQL submodules
@@ -13,7 +10,8 @@ from sqlite3 import Error
 from typing import List, Optional
 
 # Database Manager utilities
-from .utilities import sanitize_output_path, get_items_from_data
+from .utilities import sanitize_output_path, get_items_from_search_results, \
+    get_items_from_images_results, save_raw_data
 
 
 # SQLDatabaseManager class
@@ -36,6 +34,7 @@ class SQLDatabaseManager:
 
         # create required SQL tables for data processing
         self.create_search_results_table()
+        self.create_images_results_table()
     
     def create_sql_connection(self) -> Optional[sqlite3.Connection]:
         '''
@@ -105,27 +104,81 @@ class SQLDatabaseManager:
                             displayed_link
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         ''',
-                        get_items_from_data(entry)
+                        get_items_from_search_results(entry)
                     )
 
                     # commit changes
                     conn.commit()
                 
-                                
-                
-                # TEMP -> SAVE RESPONSE
-                stamp = int(time.time())
-                obj = json.dumps(data, ensure_ascii=False, indent=2)
-                temp_path = 'D:/i/dfrlab/osint-tools/tikspyder-test-data'
-                writer = open(
-                    f'{temp_path}/d_{stamp}.json',
-                    encoding='utf-8',
-                    mode='w'
-                )
-                writer.write(obj)
-                writer.close()
-
+                # save raw data response from SerpAPI
+                result_type = 'search_result'
+                save_raw_data(self.output, result_type=result_type, data=data)
             
+            except Error as e:
+                print (f'An error occurred while inserting data: {e}')
+            finally:
+                conn.close()
+        else:
+            print ('Failed to create the database connection.')
+
+    def create_images_results_table(self) -> None:
+        '''
+        Creates the images_results table if it does not already exist.
+        '''
+        # set cursor
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                cursor.execute(
+                    '''
+                    CREATE TABLE IF NOT EXISTS images_results (
+                        record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        source TEXT,
+                        title TEXT,
+                        link TEXT,
+                        thumbnail TEXT
+                    );
+                    '''
+                )
+
+                # commit changes
+                conn.commit()
+            except Error as e:
+                print (f'An error occurred: {e}')
+            finally:
+                conn.close()
+        else:
+            print ('Failed to create the database connection.')
+
+    def insert_images_results(self, data: List) -> None:
+        '''
+        Inserts data into the images_results table.
+
+        :param data: A list of dictionaries containing the data to insert.
+        '''
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                for entry in data:
+                    cursor.execute(
+                        '''
+                        INSERT INTO images_results (
+                            source, title, link, thumbnail
+                        ) VALUES (?, ?, ?, ?)
+                        ''',
+                        get_items_from_images_results(entry)
+                    )
+
+                    # commit changes
+                    conn.commit()
+                
+                # save raw data response from SerpAPI
+                result_type = 'images_result'
+                save_raw_data(self.output, result_type=result_type, data=data)
 
             except Error as e:
                 print (f'An error occurred while inserting data: {e}')

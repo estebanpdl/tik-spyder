@@ -9,7 +9,7 @@ from typing import Dict
 
 # SerpAPI utilities
 from .utilities import search_query, select_serpapi_parameters, \
-    extract_search_result_keys
+    extract_results_keys
 
 # SerpAPI module
 import serpapi
@@ -102,9 +102,10 @@ class SerpAPICollector:
         '''
         # get organic search results
         field = 'organic_results'
+        result_type = 'search_result'
         results = data.get(field, [])
         if results:
-            d = extract_search_result_keys(results)
+            d = extract_results_keys(results, result_type=result_type)
             
             # write results in SQL database
             if d:
@@ -127,8 +128,8 @@ class SerpAPICollector:
             api_response = self.client.search(self.parameters)
             print ('\n...Searching for thumbnails')
 
-            # process image results
-            self.collect_image_thumbnails(api_response.data)
+            # process images results
+            self._process_images_results(api_response.data)
 
             # get next page
             next_page = api_response.next_page_url
@@ -136,7 +137,7 @@ class SerpAPICollector:
                 next_response = api_response.next_page()
 
                 # process image results
-                self._process_image_results(next_response.data)
+                self._process_images_results(next_response.data)
 
                 # get next page
                 next_page = next_response.next_page_url
@@ -151,15 +152,24 @@ class SerpAPICollector:
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
     
-    def _process_image_results(self, data: Dict) -> None:
+    def _process_images_results(self, data: Dict) -> None:
         '''
         Processes the response data from SerpAPI, extracting thumbnails
         and inserting related data into the SQL database.
 
         :param data: SerpAPI raw data response
         '''
+        # get image results
+        field = 'images_results'
+        results = data.get(field, [])
+        if results:
+            d = extract_results_keys(results, result_type=field)
 
-        pass
+            # write results in SQL database
+            if d:
+                self.sql_database.insert_images_results(d)
+        else:
+            print ('No image results found in the response.')
 
     def _collect_related_content(self) -> None:
         '''
