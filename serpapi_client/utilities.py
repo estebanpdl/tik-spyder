@@ -54,7 +54,6 @@ def select_serpapi_parameters(args: Dict) -> Dict:
     :return: A dictionary containing only the relevant SerpAPI parameters.
     '''
     default_serpapi_parameters = [
-        'engine',
         'q',
         'google_domain',
         'gl',
@@ -69,11 +68,11 @@ def select_serpapi_parameters(args: Dict) -> Dict:
     }
 
     # add new parameters
+    params['engine'] = 'google'
     params['start'] = 0
     params['num'] = 100
 
     return params
-
 
 '''
 Extract relevant keys from SerpAPI response
@@ -87,7 +86,7 @@ def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
 
     :param data: List of dictionaries containing the SerpAPI response data.
     :param result_type: Type of SerpAPI response: 'search_result' or
-        'images_result'
+        'image_result'
     :return: A list of dictionaries, each containing the specified default
         keys from the SerpAPI response.
     '''
@@ -102,7 +101,7 @@ def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
             'snippet_highlighted_words',
             'displayed_link'
         ],
-        'images_result': [
+        'image_result': [
             'source',
             'thumbnail',
             'title',

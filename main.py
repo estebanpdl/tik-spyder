@@ -57,15 +57,6 @@ if __name__ == '__main__':
         help='The search term of phrase for which to retrieve TikTok data.'
     )
 
-    ''' engine '''
-    serpapi_arguments.add_argument(
-        '--engine',
-        type=str,
-        required=False,
-        default='google',
-        help='SerpAPI engine'
-    )
-
     ''' google domain '''
     serpapi_arguments.add_argument(
         '--google-domain',
@@ -193,11 +184,7 @@ if __name__ == '__main__':
     serp_api_collector = SerpAPICollector(args=args)
 
     # SerpAPI Call
-    log_text = f'''
-    > SerpAPI call
-    '''
-    print ('\n' + ' '.join(log_text.split()).strip())
-    serp_api_collector.collect_image_thumbnails()
+    serp_api_collector.collect_search_data()
 
     # End process
     log_text = f'''

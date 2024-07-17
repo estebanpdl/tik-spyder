@@ -64,13 +64,15 @@ class SerpAPICollector:
         Fetches data based on the initialized parameters and handles pagination
         to retrieve data from all available pages.
         '''
-        print (f'\nAPI call to Google search results:\n> {self.query}')
+        print (f'\nAPI call to Google search results\n')
+        print (f'> search query: {self.query}')
         try:
+            iteration = 0
             api_response = self.client.search(self.parameters)
-            print ('\n...Searching')
+            print ('\n> Searching...')
 
             # process search results
-            self._process_search_results(api_response.data)
+            self._process_search_results(api_response.data, n=iteration)
 
             # get next page
             next_page = api_response.next_page_url
@@ -78,14 +80,17 @@ class SerpAPICollector:
                 next_response = api_response.next_page()
 
                 # process search results
-                self._process_search_results(next_response.data)
+                self._process_search_results(next_response.data, n=iteration)
 
                 # get next page
                 next_page = next_response.next_page_url
 
                 # update api_response for the next iteration
                 api_response = next_response
+
+                # chill out
                 time.sleep(2)
+                iteration += 1
             
             # api call status
             print ('> Done')
@@ -93,12 +98,13 @@ class SerpAPICollector:
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
     
-    def _process_search_results(self, data: Dict) -> None:
+    def _process_search_results(self, data: Dict, n: int) -> None:
         '''
         Processes the response data from SerpAPI, extracting organic results
         and inserting them into the SQL database.
 
         :param data: SerpAPI raw data response
+        :param n: iterations
         '''
         # get organic search results
         field = 'organic_results'
@@ -111,7 +117,8 @@ class SerpAPICollector:
             if d:
                 self.sql_database.insert_search_results(d)
         else:
-            print ('No organic results found in the response.')
+            if n == 0:
+                print ('No organic results found in the response.')
 
     def collect_image_thumbnails(self) -> None:
         '''
@@ -122,14 +129,19 @@ class SerpAPICollector:
         self.parameters['tbm'] = 'isch'
 
         # collect images
-        print (f'\nAPI call to Google images')
+        print (f'\n\nAPI call to Google images')
 
         try:
+            iteration = 0
             api_response = self.client.search(self.parameters)
-            print ('\n...Searching for thumbnails')
+            print ('\n> Searching thumbnails...')
 
             # process images results
-            self._process_images_results(api_response.data)
+            self._process_images_results(api_response.data, n=iteration)
+
+            '''
+            collect_related_content
+            '''
 
             # get next page
             next_page = api_response.next_page_url
@@ -137,14 +149,17 @@ class SerpAPICollector:
                 next_response = api_response.next_page()
 
                 # process image results
-                self._process_images_results(next_response.data)
+                self._process_images_results(next_response.data, n=iteration)
 
                 # get next page
                 next_page = next_response.next_page_url
 
                 # update api_response for the next iteration
                 api_response = next_response
+
+                # chill out
                 time.sleep(2)
+                iteration += 1
 
             # api call status
             print ('> Done')
@@ -152,25 +167,28 @@ class SerpAPICollector:
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
     
-    def _process_images_results(self, data: Dict) -> None:
+    def _process_images_results(self, data: Dict, n: int) -> None:
         '''
         Processes the response data from SerpAPI, extracting thumbnails
         and inserting related data into the SQL database.
 
         :param data: SerpAPI raw data response
+        :param n: iterations
         '''
         # get image results
         field = 'images_results'
+        result_type = 'image_result'
         results = data.get(field, [])
         if results:
-            d = extract_results_keys(results, result_type=field)
+            d = extract_results_keys(results, result_type=result_type)
 
             # write results in SQL database
             if d:
                 self.sql_database.insert_images_results(d)
         else:
-            print ('No image results found in the response.')
-
+            if n == 0:
+                print ('No image results found in the response.')
+    
     def _collect_related_content(self) -> None:
         '''
         '''
@@ -180,3 +198,17 @@ class SerpAPICollector:
         '''
         '''
         pass
+
+    def collect_search_data(self) -> None:
+        '''
+        Collects both search results and corresponding image thumbnails.
+        '''
+        print('\n\n')
+        print('-' * 30)
+        print('Starting data collection process...\n')
+
+        self.collect_search_results()
+        self.collect_image_thumbnails()
+
+        print('\n\nData collection complete.')
+        print('-' * 30)

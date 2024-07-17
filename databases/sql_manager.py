@@ -70,7 +70,13 @@ class SQLDatabaseManager:
                         thumbnail TEXT,
                         video_link TEXT,
                         snippet_highlighted_words TEXT,
-                        displayed_link TEXT
+                        displayed_link TEXT,
+                        title_snippet TEXT,
+                        likes TEXT,
+                        comments TEXT,
+                        author TEXT,
+                        link_to_author TEXT,
+                        post_id TEXT
                     );
                     '''
                 )
@@ -101,8 +107,9 @@ class SQLDatabaseManager:
                         INSERT INTO query_search_results (
                             source, title, snippet, link, thumbnail,
                             video_link, snippet_highlighted_words,
-                            displayed_link
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                            displayed_link, title_snippet, likes, comments,
+                            author, link_to_author, post_id
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                         ''',
                         get_items_from_search_results(entry)
                     )
@@ -138,7 +145,10 @@ class SQLDatabaseManager:
                         source TEXT,
                         title TEXT,
                         link TEXT,
-                        thumbnail TEXT
+                        thumbnail TEXT,
+                        author TEXT,
+                        link_to_author TEXT,
+                        post_id TEXT
                     );
                     '''
                 )
@@ -167,8 +177,9 @@ class SQLDatabaseManager:
                     cursor.execute(
                         '''
                         INSERT INTO images_results (
-                            source, title, link, thumbnail
-                        ) VALUES (?, ?, ?, ?)
+                            source, title, link, thumbnail, author,
+                            link_to_author, post_id
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)
                         ''',
                         get_items_from_images_results(entry)
                     )
@@ -177,7 +188,7 @@ class SQLDatabaseManager:
                     conn.commit()
                 
                 # save raw data response from SerpAPI
-                result_type = 'images_result'
+                result_type = 'image_result'
                 save_raw_data(self.output, result_type=result_type, data=data)
 
             except Error as e:
