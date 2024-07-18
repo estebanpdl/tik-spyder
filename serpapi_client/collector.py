@@ -17,6 +17,9 @@ import serpapi
 # SQLManager
 from databases import SQLDatabaseManager
 
+# Connections
+from connections import RequestSession
+
 # SerpAPI collector class
 class SerpAPICollector:
     '''
@@ -56,6 +59,9 @@ class SerpAPICollector:
 
         # database connection
         self.sql_database = SQLDatabaseManager(self.output)
+
+        # connections
+        self.req_session = RequestSession()
     
     def collect_search_results(self) -> None:
         '''
@@ -189,15 +195,18 @@ class SerpAPICollector:
             if n == 0:
                 print ('No image results found in the response.')
     
-    def _collect_related_content(self) -> None:
+    def _collect_related_content(self, url: str) -> None:
         '''
         '''
-        pass
+        content = self.req_session.load_related_content(
+            url=url,
+            api_key=self.api_key
+        )
 
-    def collect_search_data(self) -> None:
         '''
+        process related content
         '''
-        pass
+        return
 
     def collect_search_data(self) -> None:
         '''
