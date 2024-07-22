@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # import modules
+import os
 import time
-import pandas as pd
+import json
+import uuid
 
 # typing
 from typing import Dict, List
@@ -74,10 +76,18 @@ class SerpAPICollector:
         '''
         print (f'\nAPI call to Google search results\n')
         print (f'> search query: {self.query}')
+        result_type = 'search_result'
         try:
             iteration = 0
             api_response = self.client.search(self.parameters)
             print ('\n> Searching...')
+
+            # save raw data
+            self._save_raw_data(
+                self.output,
+                result_type=result_type,
+                data=api_response.data
+            )
 
             # process search results
             self._process_search_results(api_response.data, n=iteration)
@@ -85,7 +95,15 @@ class SerpAPICollector:
             # get next page
             next_page = api_response.next_page_url
             while next_page:
+                # get new API response
                 next_response = api_response.next_page()
+
+                # save raw data
+                self._save_raw_data(
+                    self.output,
+                    result_type=result_type,
+                    data=next_response.data
+                )
 
                 # process search results
                 self._process_search_results(next_response.data, n=iteration)
@@ -138,11 +156,18 @@ class SerpAPICollector:
 
         # collect images
         print (f'\n\nAPI call to Google images')
-
+        result_type = 'image_result'
         try:
             iteration = 0
             api_response = self.client.search(self.parameters)
             print ('\n> Searching images...')
+
+            # save raw data
+            self._save_raw_data(
+                self.output,
+                result_type=result_type,
+                data=api_response.data
+            )
 
             # process images results
             self._process_images_results(api_response.data, n=iteration)
@@ -151,6 +176,13 @@ class SerpAPICollector:
             next_page = api_response.next_page_url
             while next_page:
                 next_response = api_response.next_page()
+
+                # save raw data
+                self._save_raw_data(
+                    self.output,
+                    result_type=result_type,
+                    data=next_response.data
+                )
 
                 # process image results
                 self._process_images_results(next_response.data, n=iteration)
@@ -218,9 +250,17 @@ class SerpAPICollector:
 
         :param url: The URL to load related content from.
         '''
+        result_type = 'related_content'
         content = self.req_session.load_related_content(
             url=url,
             api_key=self.api_key
+        )
+
+        # save raw data
+        self._save_raw_data(
+            self.output,
+            result_type=result_type,
+            data=content
         )
 
         # process related content
@@ -248,6 +288,32 @@ class SerpAPICollector:
                 self.sql_database.insert_related_content(d)
         else:
             print ('No results found in this URL')
+    
+    def _save_raw_data(self, output: str, result_type: str, data: Dict) -> None:
+        '''
+        Saves the raw data response from SerpAPI in a JSON file.
+
+        :param output: The directory path where the raw data should be saved.
+        :param result_type: Type of SerpAPI response: 'search_result',
+            'image_result', or 'related_content'
+        :param data: The raw data response from SerpAPI to be saved.
+        '''
+        # create the directory structure if it does not exist
+        folder = f'{output}/raw_data/{result_type}'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        
+        # create a timestamp for the file name
+        stamp = int(time.time())
+        uuid_code = str(uuid.uuid4()).split('-')[-1]
+
+        # convert the data to a JSON string
+        obj = json.dumps(data, ensure_ascii=False, indent=2)
+
+        # write the JSON string to a file
+        file_path = f'{folder}/{result_type}_{stamp}_{uuid_code}.json'
+        with open(file_path, encoding='utf-8', mode='w') as writer:
+            writer.write(obj)
 
     def collect_search_data(self) -> None:
         '''

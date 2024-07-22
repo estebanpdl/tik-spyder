@@ -11,8 +11,7 @@ from typing import List, Optional
 
 # Database Manager utilities
 from .utilities import sanitize_output_path, get_items_from_search_results, \
-    get_items_from_images_results, get_items_from_related_content, \
-    save_raw_data
+    get_items_from_images_results, get_items_from_related_content
 
 
 # SQLDatabaseManager class
@@ -118,10 +117,6 @@ class SQLDatabaseManager:
 
                     # commit changes
                     conn.commit()
-                
-                # save raw data response from SerpAPI
-                result_type = 'search_result'
-                save_raw_data(self.output, result_type=result_type, data=data)
             
             except Error as e:
                 print (f'An error occurred while inserting data: {e}')
@@ -188,11 +183,7 @@ class SQLDatabaseManager:
 
                     # commit changes
                     conn.commit()
-                
-                # save raw data response from SerpAPI
-                result_type = 'image_result'
-                save_raw_data(self.output, result_type=result_type, data=data)
-
+            
             except Error as e:
                 print (f'An error occurred while inserting data: {e}')
             finally:
@@ -254,10 +245,6 @@ class SQLDatabaseManager:
 
                     # commit changes
                     conn.commit()
-                
-                # save raw data response from SerpAPI
-                result_type = 'related_content'
-                save_raw_data(self.output, result_type=result_type, data=data)
 
             except Error as e:
                 print (f'An error occurred while inserting data: {e}')
