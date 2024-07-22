@@ -105,7 +105,8 @@ def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
             'source',
             'thumbnail',
             'title',
-            'link'
+            'link',
+            'serpapi_related_content_link'
         ]
     }
 
@@ -119,4 +120,30 @@ def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
         {
             k: i[k] for k in selected_keys if k in i
         } for i in d
+    ]
+
+'''
+Extract relevant keys from related content
+'''
+def extract_related_content_keys(data: List[Dict]) -> List[Dict]:
+    '''
+    Filters related content data and returns a list of dictionaries with
+    specified default keys.
+
+    :param data: List of dictionaries containing related content data.
+    :return: A list of dictionaries, each containing the specified default
+        keys for the related content.
+    '''
+    key_mapping = [
+        'source',
+        'link',
+        'thumbnail',
+        'title'
+    ]
+
+    # return list of dictionaries with specified default keys
+    return [
+        {
+            k: i[k] for k in key_mapping if k in i
+        } for i in data
     ]

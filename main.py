@@ -109,6 +109,15 @@ if __name__ == '__main__':
         help='Defines one or multiple languages to limit the search to.'
     )
 
+    ''' depth > defines number of iterations for related content '''
+    serpapi_arguments.add_argument(
+        '--depth',
+        type=int,
+        required=False,
+        default=3,
+        metavar='',
+        help='Depth of iterations to follow related content links.'
+    )
 
     # Google advanced search arguments
     google_advanced_search_arguments = parser.add_argument_group(

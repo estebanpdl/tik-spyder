@@ -5,11 +5,11 @@ import time
 import pandas as pd
 
 # typing
-from typing import Dict
+from typing import Dict, List
 
 # SerpAPI utilities
 from .utilities import search_query, select_serpapi_parameters, \
-    extract_results_keys
+    extract_results_keys, extract_related_content_keys
 
 # SerpAPI module
 import serpapi
@@ -61,6 +61,8 @@ class SerpAPICollector:
         self.sql_database = SQLDatabaseManager(self.output)
 
         # connections
+        self.related_content_urls = []
+        self.related_content_depth = args['depth']
         self.req_session = RequestSession()
     
     def collect_search_results(self) -> None:
@@ -126,7 +128,7 @@ class SerpAPICollector:
             if n == 0:
                 print ('No organic results found in the response.')
 
-    def collect_image_thumbnails(self) -> None:
+    def collect_image_results(self) -> None:
         '''
         Makes an API call to SerpAPI to collect image thumbnails from Google
         Images.
@@ -140,14 +142,10 @@ class SerpAPICollector:
         try:
             iteration = 0
             api_response = self.client.search(self.parameters)
-            print ('\n> Searching thumbnails...')
+            print ('\n> Searching images...')
 
             # process images results
             self._process_images_results(api_response.data, n=iteration)
-
-            '''
-            collect_related_content
-            '''
 
             # get next page
             next_page = api_response.next_page_url
@@ -172,6 +170,18 @@ class SerpAPICollector:
 
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
+        
+        # collect related content
+        print (f'\n\nCollecting related content')
+        if self.related_content_urls:
+            self.related_content_urls = self.related_content_urls[
+                :self.related_content_depth
+            ]
+            for url in self.related_content_urls:
+                self._collect_related_content(url=url)
+            print ('> Done')
+        else:
+            print ('No related content found.')
     
     def _process_images_results(self, data: Dict, n: int) -> None:
         '''
@@ -191,22 +201,53 @@ class SerpAPICollector:
             # write results in SQL database
             if d:
                 self.sql_database.insert_images_results(d)
+
+                # save related content urls
+                key = 'serpapi_related_content_link'
+                self.related_content_urls += [
+                    i[key] for i in d if key in i
+                ]
         else:
             if n == 0:
                 print ('No image results found in the response.')
+
     
     def _collect_related_content(self, url: str) -> None:
         '''
+        Collects related content from the given URL.
+
+        :param url: The URL to load related content from.
         '''
         content = self.req_session.load_related_content(
             url=url,
             api_key=self.api_key
         )
 
+        # process related content
+        self._process_related_content(content)
+    
+    def _process_related_content(self, content: Dict) -> None:
         '''
-        process related content
+        Processes the related content data.
+
+        :param content: A dictionary containing the related content data.
         '''
-        return
+        # get related content
+        possible_fields = ['related_content', 'images_results']
+        related_content = []
+        for field in possible_fields:
+            related_content = content.get(field, None)
+            if related_content is not None:
+                break
+        
+        if related_content:
+            d = extract_related_content_keys(related_content)
+
+            # write results in SQL database
+            if d:
+                self.sql_database.insert_related_content(d)
+        else:
+            print ('No results found in this URL')
 
     def collect_search_data(self) -> None:
         '''
@@ -217,7 +258,7 @@ class SerpAPICollector:
         print('Starting data collection process...\n')
 
         self.collect_search_results()
-        self.collect_image_thumbnails()
+        self.collect_image_results()
 
         print('\n\nData collection complete.')
         print('-' * 30)

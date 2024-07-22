@@ -11,7 +11,8 @@ from typing import List, Optional
 
 # Database Manager utilities
 from .utilities import sanitize_output_path, get_items_from_search_results, \
-    get_items_from_images_results, save_raw_data
+    get_items_from_images_results, get_items_from_related_content, \
+    save_raw_data
 
 
 # SQLDatabaseManager class
@@ -35,6 +36,7 @@ class SQLDatabaseManager:
         # create required SQL tables for data processing
         self.create_search_results_table()
         self.create_images_results_table()
+        self.create_related_content_table()
     
     def create_sql_connection(self) -> Optional[sqlite3.Connection]:
         '''
@@ -198,3 +200,68 @@ class SQLDatabaseManager:
         else:
             print ('Failed to create the database connection.')
 
+    def create_related_content_table(self) -> None:
+        '''
+        Creates the related_content table if it does not already exist.
+        '''
+        # set cursor
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                cursor.execute(
+                    '''
+                    CREATE TABLE IF NOT EXISTS related_content (
+                        record_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        source TEXT,
+                        link TEXT,
+                        thumbnail TEXT,
+                        title TEXT
+                    );
+                    '''
+                )
+
+                # commit changes
+                conn.commit()
+            except Error as e:
+                print (f'An error occurred: {e}')
+            finally:
+                conn.close()
+        else:
+            print ('Failed to create the database connection.')
+    
+    def insert_related_content(self, data: List) -> None:
+        '''
+        Inserts data into the related_content table.
+
+        :param data: A list of dictionaries containing the data to insert.
+        '''
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                for entry in data:
+                    cursor.execute(
+                        '''
+                        INSERT INTO related_content (
+                            source, link, thumbnail, title
+                        ) VALUES (?, ?, ?, ?)
+                        ''',
+                        get_items_from_related_content(entry)
+                    )
+
+                    # commit changes
+                    conn.commit()
+                
+                # save raw data response from SerpAPI
+                result_type = 'related_content'
+                save_raw_data(self.output, result_type=result_type, data=data)
+
+            except Error as e:
+                print (f'An error occurred while inserting data: {e}')
+            finally:
+                conn.close()
+        else:
+            print ('Failed to create the database connection.')

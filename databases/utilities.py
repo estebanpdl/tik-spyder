@@ -135,6 +135,11 @@ Get items and keys from images results entries
 '''
 def get_items_from_images_results(entry: Dict) -> Tuple:
     '''
+    Extracts and processes specific fields from an image results entry.
+
+    :param entry: A dictionary containing the image results entry.
+    :return: A tuple containing the extracted and processed values for the
+        fields.
     '''
     # get values
     link = entry.get('link', '')
@@ -150,6 +155,25 @@ def get_items_from_images_results(entry: Dict) -> Tuple:
         author,
         link_to_author,
         post_id
+    )
+
+'''
+Get items and keys from related content entries
+
+'''
+def get_items_from_related_content(entry: Dict) -> Tuple:
+    '''
+    Extracts and processes specific fields from a related content entry.
+
+    :param entry: A dictionary containing the related content entry.
+    :return: A tuple containing the extracted and processed values for the
+        fields.
+    '''
+    return (
+        entry.get('source', None),
+        entry.get('link', None),
+        entry.get('thumbnail', None),
+        entry.get('title', None)
     )
 
 '''
