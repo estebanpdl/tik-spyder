@@ -147,3 +147,15 @@ def extract_related_content_keys(data: List[Dict]) -> List[Dict]:
             k: i[k] for k in key_mapping if k in i
         } for i in data
     ]
+
+'''
+Build path to save image
+
+'''
+def build_filename_path(data: List[Dict]) -> str:
+    '''
+
+    :param data: List of dictionaries containing filtered data keys for
+        image results.
+    '''
+    pass

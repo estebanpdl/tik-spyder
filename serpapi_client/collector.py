@@ -16,6 +16,9 @@ from .utilities import search_query, select_serpapi_parameters, \
 # SerpAPI module
 import serpapi
 
+# pathlib
+from pathlib import Path
+
 # SQLManager
 from databases import SQLDatabaseManager
 
@@ -37,7 +40,7 @@ class SerpAPICollector:
         :param args: Dicti containing the command line arguments and options
         '''
         # get output data path
-        self.output = args['output']
+        self.output = self._sanitize_output_path(args['output'])
 
         # endpoint for SerpAPI
         self.api_key = args['api_key']
@@ -65,8 +68,27 @@ class SerpAPICollector:
         # connections
         self.related_content_urls = []
         self.related_content_depth = args['depth']
-        self.req_session = RequestSession()
+        self.http_session = RequestSession()
     
+    def _sanitize_output_path(self, output: str) -> str:
+        '''
+        Ensures the given path uses forward slashes and does not end with a slash.
+
+        :param output: The original directory path.
+        :return: A sanitized directory path with forward slashes and no
+            trailing slash.
+        '''
+        # create a Path object and normalize the path
+        path = Path(output)
+
+        # path with the correct separators for the current OS
+        output = str(path.as_posix())
+
+        # remove any trailing slashes
+        output = output.rstrip('/')
+
+        return output
+
     def collect_search_results(self) -> None:
         '''
         Makes an API call to SerpAPI and processes the response data.
@@ -234,6 +256,17 @@ class SerpAPICollector:
             if d:
                 self.sql_database.insert_images_results(d)
 
+                # download images
+                print (f'\n\nDownloading images results')
+                thumbnails = [i['thumbnail'] for i in d]
+                links = [i['link'] for i in d]
+                self.http_session.start_images_download(
+                    urls=thumbnails,
+                    links=links,
+                    output=self.output
+                )
+                print ('> Done')
+
                 # save related content urls
                 key = 'serpapi_related_content_link'
                 self.related_content_urls += [
@@ -251,7 +284,7 @@ class SerpAPICollector:
         :param url: The URL to load related content from.
         '''
         result_type = 'related_content'
-        content = self.req_session.load_related_content(
+        content = self.http_session.load_related_content(
             url=url,
             api_key=self.api_key
         )

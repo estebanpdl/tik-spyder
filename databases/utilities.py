@@ -1,39 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # import modules
-import os
 import re
-import time
-import json
 
 # typing
 from typing import Dict, Tuple
-
-# pathlib
-from pathlib import Path
-
-'''
-Clean output format
-
-'''
-def sanitize_output_path(output: str) -> str:
-    '''
-    Ensures the given path uses forward slashes and does not end with a slash.
-
-    :param output: The original directory path.
-    :return: A sanitized directory path with forward slashes and no
-        trailing slash.
-    '''
-    # create a Path object and normalize the path
-    path = Path(output)
-
-    # path with the correct separators for the current OS
-    output = str(path.as_posix())
-
-    # remove any trailing slashes
-    output = output.rstrip('/')
-
-    return output
 
 '''
 Extract likes and comments from snippet

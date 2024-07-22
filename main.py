@@ -195,6 +195,10 @@ if __name__ == '__main__':
     # SerpAPI Call
     serp_api_collector.collect_search_data()
 
+    # Read SQL database and generate a csv file
+    '''
+    '''
+
     # End process
     log_text = f'''
     > Ending program at: {time.ctime()}

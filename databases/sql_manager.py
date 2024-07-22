@@ -10,7 +10,7 @@ from sqlite3 import Error
 from typing import List, Optional
 
 # Database Manager utilities
-from .utilities import sanitize_output_path, get_items_from_search_results, \
+from .utilities import get_items_from_search_results, \
     get_items_from_images_results, get_items_from_related_content
 
 
@@ -29,8 +29,7 @@ class SQLDatabaseManager:
         :param output: The directory path where the database file will be
             created.
         '''
-        self.output = sanitize_output_path(output)
-        self.sql_database_file = f'{self.output}/database.sql'
+        self.sql_database_file = f'{output}/database.sql'
 
         # create required SQL tables for data processing
         self.create_search_results_table()
