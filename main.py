@@ -12,8 +12,11 @@ from argparse import (
 from utils import get_config_attrs, verify_date_argument, \
     create_output_data_path
 
-# serpapi collector
+# SerpAPI collector
 from serpapi_client import SerpAPICollector
+
+# video downloader
+from connections import VideoDownloader
 
 if __name__ == '__main__':
 
@@ -167,6 +170,15 @@ if __name__ == '__main__':
         )
     )
 
+    ''' download TikTok results '''
+    optional_arguments.add_argument(
+        '--download',
+        action='store_true',
+        metavar='',
+        required=False,
+        help='Specify whether to download TikTok videos from SerpAPI response.'
+    )
+
     # parse arguments
     args = vars(parser.parse_args())
 
@@ -195,10 +207,16 @@ if __name__ == '__main__':
     # SerpAPI Call
     serp_api_collector.collect_search_data()
 
-    # Read SQL database and generate a csv file
+    # read SQL database and generate a csv file
     '''
     '''
+    serp_api_collector.generate_data_files()
 
+    # download videos
+    if args['download']:
+        downloader = VideoDownloader()
+
+    
     # End process
     log_text = f'''
     > Ending program at: {time.ctime()}

@@ -72,7 +72,8 @@ class SerpAPICollector:
     
     def _sanitize_output_path(self, output: str) -> str:
         '''
-        Ensures the given path uses forward slashes and does not end with a slash.
+        Ensures the given path uses forward slashes and does not end with a
+        slash.
 
         :param output: The original directory path.
         :return: A sanitized directory path with forward slashes and no
@@ -361,3 +362,8 @@ class SerpAPICollector:
 
         print('\n\nData collection complete.')
         print('-' * 30)
+
+    def generate_data_files(self) -> None:
+        '''
+        '''
+        pass

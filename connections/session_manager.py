@@ -12,7 +12,7 @@ from aiohttp import ClientSession
 # typing
 from typing import Dict, List
 
-# SerpAPI collector class
+# HTTP session class
 class RequestSession:
     '''
     RequestSession
