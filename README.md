@@ -34,6 +34,14 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 
 <br />
 
+## ☕ Support
+
+If you find TikSpyder helpful, please consider buying me a coffee to support ongoing development and maintenance. Your donation will help me continue to improve the tool and add new features.
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/estebanpdl)
+
+<br />
+
 ## 🚀 **Features**
 
 - Collects TikTok video links using SerpAPI.
