@@ -35,8 +35,9 @@ class VideoDownloader:
         self.download_options = {
             'format': '(bv*+ba/b)[vcodec!=?h265]',
             'outtmpl': self._build_output_directory(output),
-            'nowarnings' : True,
+            'no_warnings' : True,
             'quiet': True,
+            'ignoreerrors': True,
             'noprogress': True
         }
     

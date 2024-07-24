@@ -113,7 +113,10 @@ def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
     selected_keys = key_mapping.get(result_type, [])
 
     # filter data to include only entries with 'link' containing 'video'
-    d = [i for i in data if 'link' in i and 'video' in i['link']]
+    d = [
+        i for i in data if 'link' in i and 'video' in i['link']
+        and 'tiktok.com' in i['link']
+    ]
 
     # return list of dictionaries with specified default keys
     return [
