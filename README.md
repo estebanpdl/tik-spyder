@@ -35,6 +35,14 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 
 <br />
 
+## ☕ Support
+
+If you find TikSpyder helpful, please consider buying me a coffee to support ongoing development and maintenance. Your donation will help me continue to improve the tool and add new features.
+
+[![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/estebanpdl)
+
+<br />
+
 ## 🚀 **Features**
 
 - Collects TikTok video links using SerpAPI.
@@ -144,13 +152,5 @@ The `--after 2024-02-01` and `--before 2024-05-31` options limit the search resu
 By default, collected data is saved in the `./data/` directory with a timestamp as the filename. To customize the output location, use the `--output` option followed by the desired directory path. For example, `--output my_directory/` would save the data in the my_directory/ directory.
 
 The `--download` option specifies that TikSpyder should download the TikTok videos associated with the search results.
-
-<br />
-
-## ☕ Support
-
-If you find TikSpyder helpful, please consider buying me a coffee to support ongoing development and maintenance. Your donation will help me continue to improve the tool and add new features.
-
-[![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/estebanpdl)
 
 <br />
