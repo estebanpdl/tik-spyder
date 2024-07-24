@@ -28,6 +28,8 @@
 
 TikSpyder extracts TikTok video links from Google's search results and downloads the videos. It also supports storing and retrieving collected data in a SQLite database and exporting the data to CSV files.
 
+Given the dynamic nature of search results and the constantly evolving landscape of TikTok's platform, it's important to note that the data collected by TikSpyder represents a sample rather than a comprehensive dataset. However, this sample can still be valuable for monitoring trends and identifying emerging narratives.
+
 <br />
 
 ## 🚀 **Features**
@@ -51,7 +53,7 @@ TikSpyder extracts TikTok video links from Google's search results and downloads
 <br />
 
 
-## ⚙️ **Installation**
+## 🔧 **Installation**
 
 1. Clone the repository
 
@@ -72,9 +74,9 @@ or
 pip3 install -r requirements.txt
 ```
 
-3. Once you obtain an API key from SerpAPI, populate the config/config.ini file with the described values. Replace api_key_value with your API key.
+3. Once you obtain an API key from SerpAPI, populate the config/config.ini file with the described values. Replace `api_key_value` with your API key.
 
-```sh
+```ini
 [SerpAPI Key]
 api_key = api_key_value
 ```
