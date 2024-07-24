@@ -114,7 +114,7 @@ def extract_results_keys(data: List[Dict], result_type: str) -> List[Dict]:
 
     # filter data to include only entries with 'link' containing 'video'
     d = [
-        i for i in data if 'link' in i and 'video' in i['link']
+        i for i in data if 'link' in i and '/video/' in i['link']
         and 'tiktok.com' in i['link']
     ]
 
