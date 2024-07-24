@@ -174,9 +174,20 @@ if __name__ == '__main__':
     optional_arguments.add_argument(
         '--download',
         action='store_true',
-        metavar='',
         required=False,
         help='Specify whether to download TikTok videos from SerpAPI response.'
+    )
+
+    ''' max workers > maximum number of threads '''
+    optional_arguments.add_argument(
+        '--max-workers',
+        type=int,
+        required=False,
+        metavar='',
+        help=(
+            "Specify the maximum number of threads to use for downloading "
+            "TikTok videos."
+        )
     )
 
     # parse arguments
@@ -188,7 +199,8 @@ if __name__ == '__main__':
 
     # verify provided dates
     for date_key in ['before', 'after']:
-        verify_date_argument(args, date_key)
+        if args[date_key] is not None:
+            verify_date_argument(args, date_key)
     
     # Start process
     log_text = f'''
@@ -204,19 +216,22 @@ if __name__ == '__main__':
     # SerpAPICollector instance
     serp_api_collector = SerpAPICollector(args=args)
 
-    # SerpAPI Call
+    # SerpAPI call
     serp_api_collector.collect_search_data()
 
-    # read SQL database and generate a csv file
-    '''
-    '''
+    # # read SQL database and generate a csv file
     serp_api_collector.generate_data_files()
 
     # download videos
     if args['download']:
-        downloader = VideoDownloader()
+        downloader = VideoDownloader(output=output)
 
-    
+        # get tiktok urls
+        collected_videos = serp_api_collector.get_collected_videos()
+
+        # start download
+        downloader.start_download(urls=collected_videos)
+
     # End process
     log_text = f'''
     > Ending program at: {time.ctime()}

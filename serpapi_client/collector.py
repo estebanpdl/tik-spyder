@@ -365,5 +365,16 @@ class SerpAPICollector:
 
     def generate_data_files(self) -> None:
         '''
+        Selects all data from SQL tables and generates CSV files
         '''
-        pass
+        print (f'\n\nGenerating CSV files')
+        self.sql_database.fetch_all_data()
+        print ('> Done')
+
+    def get_collected_videos(self) -> List[str]:
+        '''
+        Retrieves all collected video links from the SQL database.
+
+        :return: A list of unique video links.
+        '''
+        return self.sql_database.get_collected_videos()

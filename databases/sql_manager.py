@@ -2,6 +2,7 @@
 
 # import modules
 import sqlite3
+import pandas as pd
 
 # SQL submodules
 from sqlite3 import Error
@@ -29,7 +30,8 @@ class SQLDatabaseManager:
         :param output: The directory path where the database file will be
             created.
         '''
-        self.sql_database_file = f'{output}/database.sql'
+        self.output = output
+        self.sql_database_file = f'{self.output}/database.sql'
 
         # create required SQL tables for data processing
         self.create_search_results_table()
@@ -251,3 +253,64 @@ class SQLDatabaseManager:
                 conn.close()
         else:
             print ('Failed to create the database connection.')
+    
+    def fetch_all_data(self) -> None:
+        '''
+        Fetches all data from the SQL tables
+        '''
+        tables = ['query_search_results', 'images_results', 'related_content']
+        conn = self.create_sql_connection()
+        if conn is not None:
+            try:
+                for t in tables:
+                    q = f'''
+                    SELECT *
+                    FROM {t}
+                    '''
+                    # fetch data
+                    df = pd.read_sql_query(q, conn)
+
+                    # save data
+                    save_path = f'{self.output}/{t}.csv'
+                    df.to_csv(
+                        save_path,
+                        index=False,
+                        encoding='utf-8'
+                    )
+            
+            except Error as e:
+                print (f'An error occurred while fetching data from {t}: {e}')
+            finally:
+                conn.close()
+        
+    def get_collected_videos(self) -> List:
+        '''
+        Retrieves all unique video links from the query_search_results and
+        images_results tables.
+
+        :return: A list of unique video links.
+        '''
+        data = []
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                cursor.execute(
+                    '''
+                    SELECT link
+                    FROM query_search_results
+                    UNION
+                    SELECT link
+                    FROM images_results
+                    '''
+                )
+            
+                # fetch data
+                data = [i[0] for i in cursor.fetchall()]
+            except Error as e:
+                print (f'An error occurred while inserting data: {e}')
+            finally:
+                conn.close()
+        
+        return data
