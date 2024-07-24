@@ -50,7 +50,7 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 
 - [Python](https://www.python.org/) >= 3.11.7
 - [SerpAPI key](https://serpapi.com/)
-- Install the required Python libraries listed in `requirements.txt`:
+- Install the required Python libraries listed in `requirements.txt`.
 
 <br />
 
