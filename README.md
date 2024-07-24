@@ -18,6 +18,7 @@
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://x.com/estebanpdl)
 [![Made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
 [![Twitter estebanpdl](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://x.com/estebanpdl)
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/estebanpdl)
 
 </div>
 
@@ -31,14 +32,6 @@ TikSpyder extracts TikTok video links from Google's search results and downloads
 Given the dynamic nature of search results and the constantly evolving landscape of TikTok's platform, it's important to note that the data collected by TikSpyder represents a sample rather than a comprehensive dataset. However, this sample can still be valuable for monitoring trends and identifying emerging narratives.
 
 To get the most out of TikSpyder, **it is recommended to test your query using Google's advanced search features. This can help refine your search query, improve the relevance of your results, and test specific keywords more effectively**. By taking advantage of these features, you can ensure that you're collecting the most relevant data for your research or analysis.
-
-<br />
-
-## ☕ Support
-
-If you find TikSpyder helpful, please consider buying me a coffee to support ongoing development and maintenance. Your donation will help me continue to improve the tool and add new features.
-
-[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/estebanpdl)
 
 <br />
 
@@ -151,3 +144,13 @@ The `--after 2024-02-01` and `--before 2024-05-31` options limit the search resu
 By default, collected data is saved in the `./data/` directory with a timestamp as the filename. To customize the output location, use the `--output` option followed by the desired directory path. For example, `--output my_directory/` would save the data in the my_directory/ directory.
 
 The `--download` option specifies that TikSpyder should download the TikTok videos associated with the search results.
+
+<br />
+
+## ☕ Support
+
+If you find TikSpyder helpful, please consider buying me a coffee to support ongoing development and maintenance. Your donation will help me continue to improve the tool and add new features.
+
+[![Buy Me A Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/estebanpdl)
+
+<br />
