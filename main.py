@@ -165,8 +165,9 @@ if __name__ == '__main__':
         default=f'./data/{int(time.time())}',
         metavar='',
         help=(
-            "Specify the output data path. By default, output is saved in "
-            "the ./data/ directory with a timestamp as the filename."
+            "Specify the output directory path. If not provided, data is "
+            "saved in a timestamped subdirectory within the './data/' "
+            "directory."
         )
     )
 
