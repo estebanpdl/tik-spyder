@@ -16,6 +16,9 @@ Get configuration attributes
 '''
 def get_config_attrs():
     '''
+    Retrieves configuration attributes from a configuration file.
+
+    :return: A dictionary containing the SerpAPI credentials.
     '''
     path = './config/config.ini'
 
