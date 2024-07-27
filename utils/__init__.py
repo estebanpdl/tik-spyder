@@ -14,7 +14,7 @@ from datetime import datetime
 Get configuration attributes
 
 '''
-def get_config_attrs():
+def get_config_attrs() -> Dict:
     '''
     Retrieves configuration attributes from a configuration file.
 
