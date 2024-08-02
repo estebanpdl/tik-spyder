@@ -158,5 +158,5 @@ If you find TikSpyder helpful, please consider buying me a coffee to support ong
 
 ## 📝 TODO
 
-- [] Whisper integration
-- [] Network mapping
+- [ ] Whisper integration
+- [ ] Network mapping
