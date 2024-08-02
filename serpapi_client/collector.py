@@ -37,7 +37,7 @@ class SerpAPICollector:
         Initializes SerpAPICollector with the given parameters and options
         from the command line.
         
-        :param args: Dicti containing the command line arguments and options
+        :param args: Dict containing the command line arguments and options
         '''
         # get output data path
         self.output = self._sanitize_output_path(args['output'])
@@ -51,7 +51,14 @@ class SerpAPICollector:
 
         # build the search query string
         q = search_query(args=args)
-        self.query = f'site:{self.site}/* {q}'
+
+        # get provided user
+        self.user = args['user'][1:] if args['user'].startswith('@') \
+            else args['user']
+
+        # build advanced search query
+        self.query = f'site:{self.site}/* {q}' if self.user is None \
+            else f'site:{self.site}/@{self.user}/* {q}'
 
         # update the query parameter in args
         args['q'] = self.query
@@ -101,7 +108,6 @@ class SerpAPICollector:
         print (f'> search query: {self.query}')
         result_type = 'search_result'
         try:
-            iteration = 0
             api_response = self.client.search(self.parameters)
             print ('\n> Searching...')
 
@@ -112,8 +118,13 @@ class SerpAPICollector:
                 data=api_response.data
             )
 
+            # found results
+            found_results = False
+
             # process search results
-            self._process_search_results(api_response.data, n=iteration)
+            self._process_search_results(api_response.data)
+            if api_response.data.get('organic_results', []):
+                found_results = True
 
             # get next page
             next_page = api_response.next_page_url
@@ -129,7 +140,7 @@ class SerpAPICollector:
                 )
 
                 # process search results
-                self._process_search_results(next_response.data, n=iteration)
+                self._process_search_results(next_response.data)
 
                 # get next page
                 next_page = next_response.next_page_url
@@ -139,21 +150,22 @@ class SerpAPICollector:
 
                 # chill out
                 time.sleep(2)
-                iteration += 1
             
+            if not found_results:
+                print('No organic results found.')
+
             # api call status
             print ('> Done')
         
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
     
-    def _process_search_results(self, data: Dict, n: int) -> None:
+    def _process_search_results(self, data: Dict) -> None:
         '''
         Processes the response data from SerpAPI, extracting organic results
         and inserting them into the SQL database.
 
         :param data: SerpAPI raw data response
-        :param n: iterations
         '''
         # get organic search results
         field = 'organic_results'
@@ -165,9 +177,6 @@ class SerpAPICollector:
             # write results in SQL database
             if d:
                 self.sql_database.insert_search_results(d)
-        else:
-            if n == 0:
-                print ('No organic results found in the response.')
 
     def collect_image_results(self) -> None:
         '''
@@ -181,7 +190,6 @@ class SerpAPICollector:
         print (f'\n\nAPI call to Google images')
         result_type = 'image_result'
         try:
-            iteration = 0
             api_response = self.client.search(self.parameters)
             print ('\n> Searching images...')
 
@@ -192,8 +200,13 @@ class SerpAPICollector:
                 data=api_response.data
             )
 
+            # found results
+            found_results = False
+
             # process images results
-            self._process_images_results(api_response.data, n=iteration)
+            self._process_images_results(api_response.data)
+            if api_response.data.get('images_results', []):
+                found_results = True
 
             # get next page
             next_page = api_response.next_page_url
@@ -208,7 +221,7 @@ class SerpAPICollector:
                 )
 
                 # process image results
-                self._process_images_results(next_response.data, n=iteration)
+                self._process_images_results(next_response.data)
 
                 # get next page
                 next_page = next_response.next_page_url
@@ -218,7 +231,9 @@ class SerpAPICollector:
 
                 # chill out
                 time.sleep(2)
-                iteration += 1
+
+            if not found_results:
+                print ('No image results found in the response.')
 
             # api call status
             print ('> Done')
@@ -238,13 +253,12 @@ class SerpAPICollector:
         else:
             print ('No related content found.')
     
-    def _process_images_results(self, data: Dict, n: int) -> None:
+    def _process_images_results(self, data: Dict) -> None:
         '''
         Processes the response data from SerpAPI, extracting thumbnails
         and inserting related data into the SQL database.
 
         :param data: SerpAPI raw data response
-        :param n: iterations
         '''
         # get image results
         field = 'images_results'
@@ -273,10 +287,6 @@ class SerpAPICollector:
                 self.related_content_urls += [
                     i[key] for i in d if key in i
                 ]
-        else:
-            if n == 0:
-                print ('No image results found in the response.')
-
     
     def _collect_related_content(self, url: str) -> None:
         '''
@@ -378,3 +388,4 @@ class SerpAPICollector:
         :return: A list of unique video links.
         '''
         return self.sql_database.get_collected_videos()
+    

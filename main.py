@@ -60,6 +60,15 @@ if __name__ == '__main__':
         help='The search term of phrase for which to retrieve TikTok data.'
     )
 
+    ''' user '''
+    serpapi_arguments.add_argument(
+        '--user',
+        type=str,
+        required=False,
+        metavar='',
+        help='Specify a TikTok user to search for videos from.'
+    )
+
     ''' google domain '''
     serpapi_arguments.add_argument(
         '--google-domain',
@@ -214,13 +223,13 @@ if __name__ == '__main__':
     output = args['output']
     create_output_data_path(output)
 
-    # SerpAPICollector instance
+    # # SerpAPICollector instance
     serp_api_collector = SerpAPICollector(args=args)
 
     # SerpAPI call
     serp_api_collector.collect_search_data()
 
-    # # read SQL database and generate a csv file
+    # read SQL database and generate a csv file
     serp_api_collector.generate_data_files()
 
     # download videos
