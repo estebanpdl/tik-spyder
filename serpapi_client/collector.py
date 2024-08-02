@@ -53,8 +53,10 @@ class SerpAPICollector:
         q = search_query(args=args)
 
         # get provided user
-        self.user = args['user'][1:] if args['user'].startswith('@') \
-            else args['user']
+        self.user = args['user']
+        if self.user is not None:
+            self.user = self.user[1:] if self.user.startswith('@') \
+                else self.user
 
         # build advanced search query
         self.query = f'site:{self.site}/* {q}' if self.user is None \
