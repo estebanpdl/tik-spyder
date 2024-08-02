@@ -160,3 +160,4 @@ If you find TikSpyder helpful, please consider buying me a coffee to support ong
 
 - [ ] Whisper integration
 - [ ] Network mapping
+- [ ] Handle duplicate link values
