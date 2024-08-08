@@ -56,7 +56,7 @@ class RequestSession:
             return content
         except requests.RequestException as e:
             print(f'An error occurred: {e}')
-            return []
+            return {}
     
     async def fetch_image(self, session: ClientSession, url: str,
                           filename: str) -> None:
