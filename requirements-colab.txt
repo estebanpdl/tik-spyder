@@ -1,0 +1,4 @@
+aiohttp==3.9.5
+serpapi==0.1.5
+tqdm==4.66.4
+yt-dlp[default]
