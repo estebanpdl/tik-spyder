@@ -158,6 +158,7 @@ If you find TikSpyder helpful, please consider buying me a coffee to support ong
 
 ## 📝 TODO
 
+- [ ] Image classification using AI multimodal models
 - [ ] Whisper integration
 - [ ] Network mapping
 - [ ] Handle duplicate link values
