@@ -73,7 +73,7 @@ class VideoDownloader:
         path = f'{output}/downloaded_videos'
 
         # ensure the directory exists
-        if not os.path.exists(path=path):
+        if not os.path.exists(path):
             os.makedirs(path)
         
         return f'{path}/%(id)s.%(ext)s'
