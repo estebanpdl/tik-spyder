@@ -205,49 +205,48 @@ if __name__ == '__main__':
     # parse arguments
     args = vars(parser.parse_args())
 
+    # merging SerpAPI configuration attrs with the existing arguments
+    config_attrs = get_config_attrs()
+    args = {**args, **config_attrs}
 
-    # # merging SerpAPI configuration attrs with the existing arguments
-    # config_attrs = get_config_attrs()
-    # args = {**args, **config_attrs}
-
-    # # verify provided dates
-    # for date_key in ['before', 'after']:
-    #     if args[date_key] is not None:
-    #         verify_date_argument(args, date_key)
+    # verify provided dates
+    for date_key in ['before', 'after']:
+        if args[date_key] is not None:
+            verify_date_argument(args, date_key)
     
-    # # Start process
-    # log_text = f'''
-    # > Starting program at: {time.ctime()}
+    # Start process
+    log_text = f'''
+    > Starting program at: {time.ctime()}
 
-    # '''
-    # print ('\n\n' + ' '.join(log_text.split()).strip())
+    '''
+    print ('\n\n' + ' '.join(log_text.split()).strip())
 
-    # # create the output data path if not exists
-    # output = args['output']
-    # create_output_data_path(output)
+    # create the output data path if not exists
+    output = args['output']
+    create_output_data_path(output)
 
-    # # # SerpAPICollector instance
-    # serp_api_collector = SerpAPICollector(args=args)
+    # # SerpAPICollector instance
+    serp_api_collector = SerpAPICollector(args=args)
 
-    # # SerpAPI call
-    # serp_api_collector.collect_search_data()
+    # SerpAPI call
+    serp_api_collector.collect_search_data()
 
-    # # read SQL database and generate a csv file
-    # serp_api_collector.generate_data_files()
+    # read SQL database and generate a csv file
+    serp_api_collector.generate_data_files()
 
-    # # download videos
-    # if args['download']:
-    #     downloader = VideoDownloader(output=output)
+    # download videos
+    if args['download']:
+        downloader = VideoDownloader(output=output)
 
-    #     # get tiktok urls
-    #     collected_videos = serp_api_collector.get_collected_videos()
+        # get tiktok urls
+        collected_videos = serp_api_collector.get_collected_videos()
 
-    #     # start download
-    #     downloader.start_download(urls=collected_videos)
+        # start download
+        downloader.start_download(urls=collected_videos)
 
-    # # End process
-    # log_text = f'''
-    # > Ending program at: {time.ctime()}
+    # End process
+    log_text = f'''
+    > Ending program at: {time.ctime()}
 
-    # '''
-    # print ('\n\n' + ' '.join(log_text.split()).strip())
+    '''
+    print ('\n\n' + ' '.join(log_text.split()).strip())
