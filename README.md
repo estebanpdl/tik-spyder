@@ -6,7 +6,7 @@
 
 <br />
 
-`TikSpyder` is a command-line tool designed to collect TikTok data using multiple data sources, including SerpAPI for Google search results and Apify for direct TikTok profile scraping. The tool supports video downloading via yt-dlp and uses Python's asynchronous capabilities and multithreading for efficient data collection.
+`TikSpyder` is a command-line tool designed to collect TikTok data using SerpAPI for Google search results and Apify for TikTok data extraction. The tool supports video downloading via yt-dlp and uses Python's asynchronous capabilities and multithreading for efficient data collection.
 
 <br />
 <br />

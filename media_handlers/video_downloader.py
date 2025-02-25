@@ -23,22 +23,38 @@ class VideoDownloader:
     '''
     VideoDownloader class
 
-    This class handles the downloading of TikTok videos using yt-dlp and
-    threading for concurrent downloads.
+    This class handles the downloading of TikTok videos and their audio using
+    yt-dlp and threading for concurrent downloads.
     '''
     def __init__(self, output: str) -> None:
         '''
         Initializes the VideoDownloader with default download options.
+        Downloads both video and audio when initialized.
 
         :param output: The original directory path provided by the user
         '''
-        self.download_options = {
+        # video download options
+        self.video_options = {
             'format': '(bv*+ba/b)[vcodec!=?h265]',
-            'outtmpl': self._build_output_directory(output),
+            'outtmpl': self._build_output_directory(output, 'downloaded_videos'),
             'no_warnings' : True,
             'quiet': True,
             'ignoreerrors': True,
             'noprogress': True
+        }
+
+        # audio download options
+        self.audio_options = {
+            'format': 'bestaudio/best',
+            'outtmpl': self._build_output_directory(output, 'downloaded_audio'),
+            'no_warnings': True,
+            'quiet': True,
+            'ignoreerrors': True,
+            'noprogress': True,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+            }]
         }
     
     def _sanitize_output_path(self, output: str) -> str:
@@ -61,16 +77,17 @@ class VideoDownloader:
 
         return output
     
-    def _build_output_directory(self, output: str) -> str:
+    def _build_output_directory(self, output: str, dir_name: str) -> str:
         '''
         Builds and sanitizes the output directory path for downloading videos.
 
         :param output: The original directory path provided by the user
-        :return: The full path for saving downloaded videos with the filename
+        :param dir_name: Name of the subdirectory (videos or audio)
+        :return: The full path for saving downloaded files with the filename
             template.
         '''
         output = self._sanitize_output_path(output=output)
-        path = f'{output}/downloaded_videos'
+        path = f'{output}/{dir_name}'
 
         # ensure the directory exists
         if not os.path.exists(path):
@@ -78,14 +95,19 @@ class VideoDownloader:
         
         return f'{path}/%(id)s.%(ext)s'
 
-    def download_video(self, url: str) -> None:
+    def download_content(self, url: str) -> None:
         '''
-        Downloads a single video from the specified URL using yt-dlp.
+        Downloads both video and audio from the specified URL using yt-dlp.
 
         :param url: The URL of the TikTok video to download.
         '''
         try:
-            with YoutubeDL(self.download_options) as ydl:
+            # download video
+            with YoutubeDL(self.video_options) as ydl:
+                ydl.download(url)
+
+            # download audio
+            with YoutubeDL(self.audio_options) as ydl:
                 ydl.download(url)
         except Exception as e:
             print (f'Error downloading {url}: {e}')
@@ -100,13 +122,13 @@ class VideoDownloader:
         '''
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_url = {
-                executor.submit(self.download_video, url): url
+                executor.submit(self.download_content, url): url
                 for url in urls
             }
             for future in tqdm(
                     as_completed(future_to_url),
                     total=len(future_to_url),
-                    desc='Downloading videos'
+                    desc='Downloading content'
                 ):
                 url = future_to_url[future]
                 try:
