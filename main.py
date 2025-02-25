@@ -16,7 +16,7 @@ from utils import get_config_attrs, verify_date_argument, \
 from serpapi_client import SerpAPICollector
 
 # video downloader
-from connections import VideoDownloader
+from media_handlers import VideoDownloader
 
 if __name__ == '__main__':
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     serpapi_arguments.add_argument(
         '--q',
         type=str,
-        required=True,
+        required=False,
         metavar='',
         help='The search term of phrase for which to retrieve TikTok data.'
     )
@@ -202,8 +202,42 @@ if __name__ == '__main__':
         help='Specify whether to download TikTok videos from SerpAPI response.'
     )
 
+    ''' apify integration '''
+    optional_arguments.add_argument(
+        '--apify',
+        action='store_true',
+        required=False,
+        help='Specify whether to use Apify integration.'
+    )
+
+    optional_arguments.add_argument(
+        '--oldest-post-date',
+        type=str,
+        required=False,
+        metavar='',
+        help=(
+            "Filter posts newer than the specified date. "
+            "Format: YYYY-MM-DD."
+        )
+    )
+
+    optional_arguments.add_argument(
+        '--newest-post-date',
+        type=str,
+        required=False,
+        metavar='',
+        help=(
+            "Filter posts older than the specified date. "
+            "Format: YYYY-MM-DD."
+        )
+    )
+
     # parse arguments
     args = vars(parser.parse_args())
+
+    # validate that either a username or search query was provided
+    if args['user'] is None and args['q'] is None:
+        raise ValueError('Either --user or --q must be provided.')
 
     # merging SerpAPI configuration attrs with the existing arguments
     config_attrs = get_config_attrs()

@@ -35,7 +35,7 @@ def search_query(args: Dict) -> str:
     :param args: Dictionary containing the command line arguments and options.
     :return: A formatted query string.
     '''
-    q = args.get('q', '')
+    q = args.get('q') or ''
     advanced_search = advanced_search_options(args)
 
     return f'{q} {advanced_search}'.strip()

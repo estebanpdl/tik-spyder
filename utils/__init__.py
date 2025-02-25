@@ -16,9 +16,9 @@ Get configuration attributes
 '''
 def get_config_attrs() -> Dict:
     '''
-    Retrieves configuration attributes from a configuration file.
+    Retrieves configuration attributes from configuration files.
 
-    :return: A dictionary containing the SerpAPI credentials.
+    :return: A dictionary containing the SerpAPI and Apify credentials.
     '''
     path = './config/config.ini'
 
@@ -26,9 +26,18 @@ def get_config_attrs() -> Dict:
     config = ConfigParser()
     config.read(path)
 
+    # Get credentials from both sections
+    credentials = {}
+    
     # SerpAPI credentials
-    attrs = config['SerpAPI Key']
-    return dict(attrs)
+    if 'SerpAPI Key' in config:
+        credentials.update(dict(config['SerpAPI Key']))
+    
+    # Apify credentials
+    if 'Apify Token' in config:
+        credentials.update(dict(config['Apify Token']))
+    
+    return credentials
 
 '''
 Verify date format

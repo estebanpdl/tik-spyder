@@ -6,7 +6,7 @@
 
 <br />
 
-`TikSpyder` is a command-line tool designed to collect TikTok data from Google's search results using SerpAPI and yt-dlp for downloading TikTok videos. This tool utilizes Python's asynchronous capabilities and multithreading to enable efficient data collection and video downloading.
+`TikSpyder` is a command-line tool designed to collect TikTok data using multiple data sources, including SerpAPI for Google search results and Apify for direct TikTok profile scraping. The tool supports video downloading via yt-dlp and uses Python's asynchronous capabilities and multithreading for efficient data collection.
 
 <br />
 <br />
@@ -27,9 +27,13 @@
 
 ## 🔍 **Description**
 
-TikSpyder extracts TikTok video links from Google's search results and downloads the videos. It also supports storing and retrieving collected data in a SQLite database and exporting the data to CSV files.
+TikSpyder offers two main methods of data collection:
+1. **Google Search Results**: Using SerpAPI to find TikTok videos based on search queries
+2. **Direct Profile Scraping**: Using Apify to collect videos directly from TikTok profiles
 
-Given the dynamic nature of search results and the constantly evolving landscape of TikTok's platform, it's important to note that the data collected by TikSpyder represents a sample rather than a comprehensive dataset. However, this sample can still be valuable for monitoring trends and identifying emerging narratives.
+The tool supports various filtering options, including date ranges and content types, and can download both videos and thumbnails. Data is stored in a SQLite database and can be exported to CSV files for further analysis.
+
+Given the dynamic nature of search results and the constantly evolving landscape of TikTok's platform, it's important to note that the data collected by TikSpyder represents a sample rather than a comprehensive dataset. However, this sample can still be valuable for monitoring trends and identifying emerging narratives in the information ecosystem.
 
 To get the most out of TikSpyder, **it is recommended to test your query using Google's advanced search features. This can help refine your search query, improve the relevance of your results, and test specific keywords more effectively**. By taking advantage of these features, you can ensure that you're collecting the most relevant data for your research or analysis.
 
@@ -76,11 +80,15 @@ or
 pip3 install -r requirements.txt
 ```
 
-3. Once you obtain an API key from SerpAPI, populate the config/config.ini file with the described values. Replace `api_key_value` with your API key.
+3. Once you obtain an API key from SerpAPI and Apify, populate the config/config.ini file with the described values. Replace `api_key_value` and `apify_token_value` with your API key and token.
 
 ```ini
+
 [SerpAPI Key]
-api_key = api_key_value
+api_key = your_serp_api_key
+
+[Apify Token]
+apify_token = your_apify_token
 ```
 
 <br />
@@ -102,31 +110,37 @@ python main.py -h
 ```
 
 ```
+Command Line Arguments.
+
 Help options:
-  -h, --help        Show this help message and exit.
+  -h, --help           Show this help message and exit.
 
 SerpAPI options:
-  --q               The search term of phrase for which to retrieve TikTok data.
-  --user            Specify a TikTok user to search for videos from.
-  --google-domain   Defines the Google domain to use. It defaults to google.com.
-  --gl              Defines the country to use for the search. Two-letter country code.
-  --hl              Defines the language to use for the search. Two-letter language code.
-  --cr              Defines one or multiple countries to limit the search to.
-  --lr              Defines one or multiple languages to limit the search to.
-  --depth           Depth of iterations to follow related content links.
+  --q                  The search term of phrase for which to retrieve TikTok data.
+  --user               Specify a TikTok user to search for videos from.
+  --google-domain      Defines the Google domain to use. It defaults to google.com.
+  --gl                 Defines the country to use for the search. Two-letter country code.
+  --hl                 Defines the language to use for the search. Two-letter language code.
+  --cr                 Defines one or multiple countries to limit the search to.
+  --lr                 Defines one or multiple languages to limit the search to.
+  --depth              Depth of iterations to follow related content links.
 
 Google advanced search options:
-  --before          Limit results to posts published before the specified date. Format: YYYY-MM-DD.
-  --after           Limit results to posts published after the specified date. Format: YYYY-MM-DD.
+  --before             Limit results to posts published before the specified date. Format: YYYY-MM-DD.
+  --after              Limit results to posts published after the specified date. Format: YYYY-MM-DD.
 
 Optional arguments and parameters:
-  -o , --output     Specify the output data path. By default, output is saved in the ./data/ directory with a timestamp as the filename.
-  --download        Specify whether to download TikTok videos from SerpAPI response.
-  --max-workers     Specify the maximum number of threads to use for downloading TikTok videos.
-
+  -o , --output        Specify the output directory path. If not provided, data is saved in a timestamped subdirectory within the './data/' directory.
+  -w , --max-workers   Specify the maximum number of threads to use for downloading TikTok videos.
+  -d, --download       Specify whether to download TikTok videos from SerpAPI response.
+  --apify              Specify whether to use Apify integration.
+  --oldest-post-date   Filter posts newer than the specified date. Format: YYYY-MM-DD.
+  --newest-post-date   Filter posts older than the specified date. Format: YYYY-MM-DD.
 ```
 
-### **Search query**
+### **Example Usage**
+
+1. Search-based collection:
 
 ```sh
 python main.py --q "F-16 AND Enemy AND (Ukraine OR Russia)" --gl us --hl en --after 2024-02-01 --before 2024-05-31 --output {output_directory}/ --download
@@ -134,17 +148,13 @@ python main.py --q "F-16 AND Enemy AND (Ukraine OR Russia)" --gl us --hl en --af
 # Note: Replace '{output_directory}' with the desired output path.
 ```
 
-#### Explanation
+2. Profile-based collection:
 
-The search query `--q "F-16 AND Enemy AND (Ukraine OR Russia)"` specifies that TikSpyder should search for TikTok videos related to the keywords "F-16", "Enemy", "Ukraine", and "Russia".
+```sh
+python main.py --q Trump --user username --output {output_directory}/ --download --apify --oldest-post-date 2025-01-01
 
-The `--gl us` option specifies that the search should be limited to the **United States**, while the `--hl en` option specifies that the search results should be in **English**.
-
-The `--after 2024-02-01` and `--before 2024-05-31` options limit the search results to **videos published between February 1, 2024 and May 31, 2024**.
-
-By default, collected data is saved in the `./data/` directory with a timestamp as the filename. To customize the output location, use the `--output` option followed by the desired directory path. For example, `--output my_directory/` would save the data in the my_directory/ directory.
-
-The `--download` option specifies that TikSpyder should download the TikTok videos associated with the search results.
+# Note: Replace '{output_directory}' with the desired output path.
+```
 
 <br />
 

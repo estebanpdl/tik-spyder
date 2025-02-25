@@ -16,14 +16,17 @@ from .utilities import search_query, select_serpapi_parameters, \
 # SerpAPI module
 import serpapi
 
+# Apify client
+from apify_client import ApifyClient
+
 # pathlib
 from pathlib import Path
 
 # SQLManager
 from databases import SQLDatabaseManager
 
-# Connections
-from connections import RequestSession
+# Media handlers
+from media_handlers import RequestSession
 
 # SerpAPI collector class
 class SerpAPICollector:
@@ -45,6 +48,9 @@ class SerpAPICollector:
         # endpoint for SerpAPI
         self.api_key = args['api_key']
         self.endpoint = 'https://serpapi.com/search'
+
+        # Apify token
+        self.apify_token = args['apify_token']
 
         # main site: tiktok.com
         self.site = 'tiktok.com'
@@ -70,6 +76,17 @@ class SerpAPICollector:
 
         # SerpAPI client
         self.client = serpapi.Client(api_key=self.api_key)
+
+        # Apify client
+        self.run_apify = False
+        if args['apify']:
+            self.run_apify = True
+            self.should_download_videos = args['download']
+            self.apify_client = ApifyClient(self.apify_token)
+
+            # optional date filters
+            self.oldest_post_date = args['oldest_post_date']
+            self.newest_post_date = args['newest_post_date']
 
         # database connection
         self.sql_database = SQLDatabaseManager(self.output)
@@ -361,6 +378,47 @@ class SerpAPICollector:
         with open(file_path, encoding='utf-8', mode='w') as writer:
             writer.write(obj)
 
+    def _apify_tiktok_profile_scraper(self) -> None:
+        '''
+        Collects search data using Apify.
+        '''
+        print ('\n\nCollecting user data with Apify')
+
+        # get the search results
+        run_input = {
+            'profiles': [self.user],
+            'profileScrapeSections': ['videos'],
+            'profileSorting': 'latest',
+            'resultsPerPage': 100,
+            'excludePinnedPosts': False,
+            'shouldDownloadVideos': self.should_download_videos,
+            'shouldDownloadCovers': True,
+            'shouldDownloadSubtitles': False,
+            'shouldDownloadSlideshowImages': False,
+            'shouldDownloadAvatars': True
+        }
+
+        # add optional date filters
+        if self.oldest_post_date:
+            run_input['oldestPostDate'] = self.oldest_post_date
+        if self.newest_post_date:
+            run_input['newestPostDate'] = self.newest_post_date
+
+        # run the Apify actor
+        apify_actor_key = '0FXVyOXXEmdGcV88a'
+        run = self.apify_client.actor(apify_actor_key).call(
+            run_input=run_input
+        )
+
+        # store data
+        store_data = []
+        for item in self.apify_client.dataset(run['defaultDatasetId']).iterate_items():
+            store_data.append(item)
+
+        # save store data as json file
+        with open(f'{self.output}/apify_data.json', 'w', encoding='utf-8') as f:
+            json.dump(store_data, f, ensure_ascii=False, indent=2)
+
     def collect_search_data(self) -> None:
         '''
         Collects both search results and corresponding image thumbnails.
@@ -371,6 +429,9 @@ class SerpAPICollector:
 
         self.collect_search_results()
         self.collect_image_results()
+
+        if self.run_apify:
+            self._apify_tiktok_profile_scraper()
 
         print('\n\nData collection complete.')
         print('-' * 30)
