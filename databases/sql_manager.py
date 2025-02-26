@@ -309,7 +309,7 @@ class SQLDatabaseManager:
                 # fetch data
                 data = [i[0] for i in cursor.fetchall()]
             except Error as e:
-                print (f'An error occurred while inserting data: {e}')
+                print (f'An error occurred while retrieving data: {e}')
             finally:
                 conn.close()
         

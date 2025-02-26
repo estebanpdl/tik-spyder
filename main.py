@@ -160,6 +160,41 @@ if __name__ == '__main__':
         )
     )
 
+    # Apify optional arguments
+    apify_arguments = parser.add_argument_group(
+        'Optional Apify arguments'
+    )
+
+    ''' apify integration '''
+    apify_arguments.add_argument(
+        '--apify',
+        action='store_true',
+        required=False,
+        help='Specify whether to use Apify integration.'
+    )
+
+    apify_arguments.add_argument(
+        '--oldest-post-date',
+        type=str,
+        required=False,
+        metavar='',
+        help=(
+            "Filter posts newer than the specified date. "
+            "Format: YYYY-MM-DD."
+        )
+    )
+
+    apify_arguments.add_argument(
+        '--newest-post-date',
+        type=str,
+        required=False,
+        metavar='',
+        help=(
+            "Filter posts older than the specified date. "
+            "Format: YYYY-MM-DD."
+        )
+    )
+
     # optional arguments
     optional_arguments = parser.add_argument_group(
         'Optional arguments and parameters'
@@ -179,7 +214,16 @@ if __name__ == '__main__':
             "directory."
         )
     )
-    
+
+    ''' download TikTok results '''
+    optional_arguments.add_argument(
+        '-d',
+        '--download',
+        action='store_true',
+        required=False,
+        help='Specify whether to download TikTok videos from SerpAPI and Apify.'
+    )
+
     ''' max workers > maximum number of threads '''
     optional_arguments.add_argument(
         '-w',
@@ -193,43 +237,11 @@ if __name__ == '__main__':
         )
     )
 
-    ''' download TikTok results '''
     optional_arguments.add_argument(
-        '-d',
-        '--download',
+        '--use-tor',
         action='store_true',
         required=False,
-        help='Specify whether to download TikTok videos from SerpAPI response.'
-    )
-
-    ''' apify integration '''
-    optional_arguments.add_argument(
-        '--apify',
-        action='store_true',
-        required=False,
-        help='Specify whether to use Apify integration.'
-    )
-
-    optional_arguments.add_argument(
-        '--oldest-post-date',
-        type=str,
-        required=False,
-        metavar='',
-        help=(
-            "Filter posts newer than the specified date. "
-            "Format: YYYY-MM-DD."
-        )
-    )
-
-    optional_arguments.add_argument(
-        '--newest-post-date',
-        type=str,
-        required=False,
-        metavar='',
-        help=(
-            "Filter posts older than the specified date. "
-            "Format: YYYY-MM-DD."
-        )
+        help='Specify whether to use Tor for downloading TikTok videos.'
     )
 
     # parse arguments
@@ -270,7 +282,7 @@ if __name__ == '__main__':
 
     # download videos
     if args['download']:
-        downloader = VideoDownloader(output=output)
+        downloader = VideoDownloader(output=output, use_tor=args['use_tor'])
 
         # get tiktok urls
         collected_videos = serp_api_collector.get_collected_videos()

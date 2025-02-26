@@ -1,6 +1,8 @@
 aiohttp
 pandas
+PySocks
 requests
 serpapi
+stem
 tqdm
 yt-dlp[default]

@@ -129,13 +129,16 @@ Google advanced search options:
   --before             Limit results to posts published before the specified date. Format: YYYY-MM-DD.
   --after              Limit results to posts published after the specified date. Format: YYYY-MM-DD.
 
-Optional arguments and parameters:
-  -o , --output        Specify the output directory path. If not provided, data is saved in a timestamped subdirectory within the './data/' directory.
-  -w , --max-workers   Specify the maximum number of threads to use for downloading TikTok videos.
-  -d, --download       Specify whether to download TikTok videos from SerpAPI response.
+Optional Apify arguments:
   --apify              Specify whether to use Apify integration.
   --oldest-post-date   Filter posts newer than the specified date. Format: YYYY-MM-DD.
   --newest-post-date   Filter posts older than the specified date. Format: YYYY-MM-DD.
+
+Optional arguments and parameters:
+  -o , --output        Specify the output directory path. If not provided, data is saved in a timestamped subdirectory within the './data/' directory.
+  -d, --download       Specify whether to download TikTok videos from SerpAPI and Apify.
+  -w , --max-workers   Specify the maximum number of threads to use for downloading TikTok videos.
+  --use-tor            Specify whether to use Tor for downloading TikTok videos.
 ```
 
 ### **Example Usage**
@@ -155,6 +158,24 @@ python main.py --q Trump --user username --output {output_directory}/ --download
 
 # Note: Replace '{output_directory}' with the desired output path.
 ```
+
+### Tor Integration
+You can now use Tor network for downloading TikTok videos to enhance privacy and avoid rate limiting. To use this feature:
+
+1. Make sure Tor Browser is installed and running
+2. Configure your torrc file with:
+
+```
+## Enable SOCKS proxy
+SocksPort 9050
+
+## Enable Control Port for IP rotation
+ControlPort 9051
+CookieAuthentication 1
+```
+
+3. Use the `--use-tor` flag when running the script. If Tor connection fails, the script will automatically fall back to a normal connection.
+
 
 <br />
 

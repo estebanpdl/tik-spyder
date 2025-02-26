@@ -2,6 +2,7 @@
 
 # import modules
 import os
+import time
 
 # threads
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -18,6 +19,10 @@ from tqdm import tqdm
 # yt_dlp module
 from yt_dlp import YoutubeDL
 
+# stem module
+from stem import Signal
+from stem.control import Controller
+
 # Video downloader class
 class VideoDownloader:
     '''
@@ -26,31 +31,42 @@ class VideoDownloader:
     This class handles the downloading of TikTok videos and their audio using
     yt-dlp and threading for concurrent downloads.
     '''
-    def __init__(self, output: str) -> None:
+    def __init__(self, output: str, use_tor: bool = False) -> None:
         '''
         Initializes the VideoDownloader with default download options.
         Downloads both video and audio when initialized.
 
         :param output: The original directory path provided by the user
+        :param use_tor: Boolean indicating whether to use Tor for downloads
         '''
-        # video download options
-        self.video_options = {
-            'format': '(bv*+ba/b)[vcodec!=?h265]',
-            'outtmpl': self._build_output_directory(output, 'downloaded_videos'),
-            'no_warnings' : True,
+        # initialize Tor proxy settings
+        self.use_tor = use_tor
+        self.proxy = 'socks5://127.0.0.1:9050'
+
+        # Common options for both video and audio
+        common_options = {
+            'socket_timeout': 10,
+            'no_warnings': True,
             'quiet': True,
             'ignoreerrors': True,
             'noprogress': True
         }
 
+        if self.use_tor:
+            common_options['proxy'] = self.proxy
+
+        # video download options
+        self.video_options = {
+            **common_options,
+            'format': '(bv*+ba/b)[vcodec!=?h265]',
+            'outtmpl': self._build_output_directory(output, 'downloaded_videos')
+        }
+
         # audio download options
         self.audio_options = {
+            **common_options,
             'format': 'bestaudio/best',
             'outtmpl': self._build_output_directory(output, 'downloaded_audio'),
-            'no_warnings': True,
-            'quiet': True,
-            'ignoreerrors': True,
-            'noprogress': True,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -95,23 +111,49 @@ class VideoDownloader:
         
         return f'{path}/%(id)s.%(ext)s'
 
+    def renew_tor_ip(self) -> None:
+        '''
+        Requests a new Tor circuit to change the IP address.
+        '''
+        try:
+            with Controller.from_port(port=9051) as controller:
+                controller.authenticate()
+                controller.signal(Signal.NEWNYM)
+                time.sleep(5)
+        except Exception as e:
+            print(f'Error renewing Tor IP: {e}')
+
     def download_content(self, url: str) -> None:
         '''
         Downloads both video and audio from the specified URL using yt-dlp.
 
         :param url: The URL of the TikTok video to download.
         '''
-        try:
-            # download video
-            with YoutubeDL(self.video_options) as ydl:
-                ydl.download(url)
+        max_attempts = 3 if self.use_tor else 1
+        for attempt in range(max_attempts):
+            try:
+                # download video
+                with YoutubeDL(self.video_options) as ydl:
+                    ydl.download(url)
 
-            # download audio
-            with YoutubeDL(self.audio_options) as ydl:
-                ydl.download(url)
-        except Exception as e:
-            print (f'Error downloading {url}: {e}')
-    
+                # download audio
+                with YoutubeDL(self.audio_options) as ydl:
+                    ydl.download(url)
+                
+                return
+                
+            except Exception as e:
+                print(f'Error downloading {url}: {e}')
+                
+                if self.use_tor and attempt < max_attempts - 1:
+                    print('Renewing Tor circuit...')
+                    self.renew_tor_ip()
+
+                    # wait for circuit to be established
+                    time.sleep(5)
+                else:
+                    break
+
     def download_videos(self, urls: List[str], max_workers: int) -> None:
         '''
         Downloads multiple videos concurrently using a thread pool.
@@ -147,6 +189,41 @@ class VideoDownloader:
         print('\n\n')
         print('-' * 30)
         print('Downloading videos')
+        
+        if self.use_tor:
+            try:
+                # test if port is open
+                import socket
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                result = sock.connect_ex(('127.0.0.1', 9050))
+                if result != 0:
+                    print ('\n\n')
+                    print('Tor SOCKS port (9050) is not open. Is Tor running?')
+                    print('Falling back to normal connection.\n')
+                    self.use_tor = False
+                    return
+                
+                # if port is open, test Tor connection
+                import requests
+                print('\n\nTesting Tor connection...')
+                response = requests.get(
+                    'https://check.torproject.org/api/ip',
+                    proxies={
+                        'http': self.proxy,
+                        'https': self.proxy
+                    },
+                    timeout=10
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    print(f'Tor connection successful. Exit node IP: {data.get("IP")}\n\n')
+                else:
+                    print('Tor enabled but connection check failed. Using normal connection.\n\n')
+                    self.use_tor = False
+            except Exception as e:
+                print(f'\nTor connection failed ({e}). Using normal connection.\n')
+                self.use_tor = False
+        
         print('Starting download...\n')
         
         # download videos
