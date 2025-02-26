@@ -165,12 +165,3 @@ If you find TikSpyder helpful, please consider buying me a coffee to support ong
 [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/estebanpdl)
 
 <br />
-
-## 📝 TODO
-
-- [ ] Image classification using AI multimodal models
-- [ ] Whisper integration
-- [ ] Network mapping
-- [ ] Handle duplicate link values
-- [ ] Explore doccano annotation tool
-- [ ] Ollama integration

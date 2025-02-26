@@ -68,7 +68,7 @@ class SQLDatabaseManager:
                         source TEXT,
                         title TEXT,
                         snippet TEXT,
-                        link TEXT,
+                        link TEXT UNIQUE,
                         thumbnail TEXT,
                         video_link TEXT,
                         snippet_highlighted_words TEXT,
@@ -78,7 +78,7 @@ class SQLDatabaseManager:
                         comments TEXT,
                         author TEXT,
                         link_to_author TEXT,
-                        post_id TEXT
+                        post_id TEXT UNIQUE
                     );
                     '''
                 )
@@ -106,7 +106,7 @@ class SQLDatabaseManager:
                 for entry in data:
                     cursor.execute(
                         '''
-                        INSERT INTO query_search_results (
+                        INSERT OR IGNORE INTO query_search_results (
                             source, title, snippet, link, thumbnail,
                             video_link, snippet_highlighted_words,
                             displayed_link, title_snippet, likes, comments,
@@ -142,11 +142,11 @@ class SQLDatabaseManager:
                         record_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         source TEXT,
                         title TEXT,
-                        link TEXT,
+                        link TEXT UNIQUE,
                         thumbnail TEXT,
                         author TEXT,
                         link_to_author TEXT,
-                        post_id TEXT
+                        post_id TEXT UNIQUE
                     );
                     '''
                 )
@@ -174,7 +174,7 @@ class SQLDatabaseManager:
                 for entry in data:
                     cursor.execute(
                         '''
-                        INSERT INTO images_results (
+                        INSERT OR IGNORE INTO images_results (
                             source, title, link, thumbnail, author,
                             link_to_author, post_id
                         ) VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -207,7 +207,7 @@ class SQLDatabaseManager:
                     CREATE TABLE IF NOT EXISTS related_content (
                         record_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         source TEXT,
-                        link TEXT,
+                        link TEXT UNIQUE,
                         thumbnail TEXT,
                         title TEXT
                     );
@@ -237,7 +237,7 @@ class SQLDatabaseManager:
                 for entry in data:
                     cursor.execute(
                         '''
-                        INSERT INTO related_content (
+                        INSERT OR IGNORE INTO related_content (
                             source, link, thumbnail, title
                         ) VALUES (?, ?, ?, ?)
                         ''',
