@@ -282,13 +282,21 @@ if __name__ == '__main__':
 
     # download videos
     if args['download']:
-        downloader = VideoDownloader(output=output, use_tor=args['use_tor'])
+        print ('\n\n')
+        print('-' * 30)
+        print('Downloading videos')
 
         # get tiktok urls
         collected_videos = serp_api_collector.get_collected_videos()
 
-        # start download
-        downloader.start_download(urls=collected_videos)
+        if collected_videos:
+            print(f'\n> Found {len(collected_videos)} videos to download.')
+            downloader = VideoDownloader(output=output, use_tor=args['use_tor'])
+
+            # start download
+            downloader.start_download(urls=collected_videos)
+        else:
+            print('\n> Search results did not return any videos to download.')
 
     # End process
     log_text = f'''

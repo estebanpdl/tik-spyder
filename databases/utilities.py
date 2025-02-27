@@ -54,7 +54,7 @@ def extract_author_post_id(link: str) -> Tuple:
     '''
     author = link.split('/')[3].replace('@', '')
     link_to_author = f'https://www.tiktok.com/@{author}'
-    post_id = link.split('/')[-1]
+    post_id = link.split('/')[-1].split('?')[0]
 
     return author, link_to_author, post_id
 

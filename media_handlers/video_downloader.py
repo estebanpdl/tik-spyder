@@ -45,7 +45,8 @@ class VideoDownloader:
 
         # Common options for both video and audio
         common_options = {
-            'socket_timeout': 10,
+            'retries': 5,
+            'retry_sleep': 5,
             'no_warnings': True,
             'quiet': True,
             'ignoreerrors': True,
@@ -186,10 +187,6 @@ class VideoDownloader:
         :param max_workers: The maximum number of threads to use for
             downloading. Default is 5.
         '''
-        print('\n\n')
-        print('-' * 30)
-        print('Downloading videos')
-        
         if self.use_tor:
             try:
                 # test if port is open

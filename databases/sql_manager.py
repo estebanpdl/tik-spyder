@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # import modules
+import os
 import sqlite3
 import pandas as pd
 
@@ -12,7 +13,8 @@ from typing import List, Optional
 
 # Database Manager utilities
 from .utilities import get_items_from_search_results, \
-    get_items_from_images_results, get_items_from_related_content
+    get_items_from_images_results, get_items_from_related_content, \
+    extract_author_post_id
 
 
 # SQLDatabaseManager class
@@ -296,6 +298,7 @@ class SQLDatabaseManager:
             cursor = conn.cursor()
 
             try:
+                # get all video links from database
                 cursor.execute(
                     '''
                     SELECT link
@@ -306,8 +309,27 @@ class SQLDatabaseManager:
                     '''
                 )
             
-                # fetch data
-                data = [i[0] for i in cursor.fetchall()]
+                # fetch all links
+                all_links = [i[0] for i in cursor.fetchall()]
+
+                # get list of already downloaded videos
+                videos_dir = os.path.join(self.output, 'downloaded_videos')
+
+                if os.path.exists(videos_dir):
+                    # get existing video ids
+                    existing_ids = {
+                        os.path.splitext(f)[0]
+                        for f in os.listdir(videos_dir)
+                        if os.path.isfile(os.path.join(videos_dir, f))
+                    }
+
+                    # filter out links whose IDs are already downloaded
+                    data = [
+                        link for link in all_links
+                        if extract_author_post_id(link)[2] not in existing_ids
+                    ]
+                else:
+                    data = all_links
             except Error as e:
                 print (f'An error occurred while retrieving data: {e}')
             finally:
