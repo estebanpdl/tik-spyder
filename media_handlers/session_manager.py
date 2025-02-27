@@ -108,7 +108,7 @@ class RequestSession:
         :return: The full path (including filename) where the image will be
             saved.
         '''
-        post_id = link.split('/')[-1]
+        post_id = link.split('/')[-1].split('?')[0]
         return f'{output}/image_id_{post_id}.png'
 
     def start_images_download(self, urls: List[str], links: List[str],
