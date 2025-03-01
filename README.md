@@ -41,13 +41,14 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 
 ## 🚀 **Features**
 
-- Collects TikTok video links using SerpAPI.
+- Collects TikTok video links using SerpAPI and Apify.
 - Collects and downloads thumbnails for TikTok videos.
 - Collects related content to the search query.
 - Stores collected data in a SQLite database.
 - Exports data to CSV files.
 - Downloads TikTok videos using yt-dlp.
 - Supports asynchronous and multithreaded downloading for improved performance.
+- Supports Tor network for downloading TikTok videos to enhance privacy and avoid rate limiting.
 
 <br />
 
@@ -55,6 +56,9 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 
 - [Python](https://www.python.org/) >= 3.11.7
 - [SerpAPI key](https://serpapi.com/)
+- [Apify API token](https://apify.com/) (optional)
+- [Tor Browser](https://www.torproject.org/) (optional)
+- [ffmpeg](https://ffmpeg.org/)
 - Install the required Python libraries listed in `requirements.txt`.
 
 <br />
