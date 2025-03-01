@@ -29,15 +29,15 @@ from databases import SQLDatabaseManager
 from media_handlers import RequestSession
 
 # SerpAPI collector class
-class SerpAPICollector:
+class TikTokDataCollector:
     '''
-    SerpAPICollector collects TikTok data from Google search results
+    TikTokDataCollector collects TikTok data from Google search results
     using SerpAPI.
     '''
 
     def __init__(self, args: Dict) -> None:
         '''
-        Initializes SerpAPICollector with the given parameters and options
+        Initializes TikTokDataCollector with the given parameters and options
         from the command line.
         
         :param args: Dict containing the command line arguments and options
@@ -89,7 +89,7 @@ class SerpAPICollector:
             self.newest_post_date = args['newest_post_date']
 
         # database connection
-        self.sql_database = SQLDatabaseManager(self.output)
+        self.sql_database = SQLDatabaseManager(self.output, self.run_apify)
 
         # connections
         self.related_content_urls = []
@@ -351,32 +351,6 @@ class SerpAPICollector:
                 self.sql_database.insert_related_content(d)
         else:
             print ('No results found in this URL')
-    
-    def _save_raw_data(self, output: str, result_type: str, data: Dict) -> None:
-        '''
-        Saves the raw data response from SerpAPI in a JSON file.
-
-        :param output: The directory path where the raw data should be saved.
-        :param result_type: Type of SerpAPI response: 'search_result',
-            'image_result', or 'related_content'
-        :param data: The raw data response from SerpAPI to be saved.
-        '''
-        # create the directory structure if it does not exist
-        folder = f'{output}/raw_data/{result_type}'
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        
-        # create a timestamp for the file name
-        stamp = int(time.time())
-        uuid_code = str(uuid.uuid4()).split('-')[-1]
-
-        # convert the data to a JSON string
-        obj = json.dumps(data, ensure_ascii=False, indent=2)
-
-        # write the JSON string to a file
-        file_path = f'{folder}/{result_type}_{stamp}_{uuid_code}.json'
-        with open(file_path, encoding='utf-8', mode='w') as writer:
-            writer.write(obj)
 
     def _apify_tiktok_profile_scraper(self) -> None:
         '''
@@ -415,10 +389,60 @@ class SerpAPICollector:
         for item in self.apify_client.dataset(run['defaultDatasetId']).iterate_items():
             store_data.append(item)
 
-        # save store data as json file
-        with open(f'{self.output}/apify_data.json', 'w', encoding='utf-8') as f:
-            json.dump(store_data, f, ensure_ascii=False, indent=2)
+        # write raw data
+        self._save_raw_data(
+            self.output,
+            result_type='apify_profile_data',
+            data=store_data
+        )
 
+        # process data
+        self._process_apify_profile_data(store_data)
+        
+    def _process_apify_profile_data(self, data: Dict) -> None:
+        '''
+        Processes the Apify profile data.
+
+        :param data: A dictionary containing the Apify profile data.
+        '''
+        # insert data into SQL database
+        self.sql_database.insert_apify_profile_data(data)
+
+        '''
+        - download videos
+        - download audio
+        - download covers/thumbnails
+        '''
+        x = 1
+
+        return
+    
+    def _save_raw_data(self, output: str, result_type: str, data: Dict) -> None:
+        '''
+        Saves the raw data response from SerpAPI in a JSON file.
+
+        :param output: The directory path where the raw data should be saved.
+        :param result_type: Type of SerpAPI response: 'search_result',
+            'image_result', or 'related_content'
+        :param data: The raw data response from SerpAPI to be saved.
+        '''
+        # create the directory structure if it does not exist
+        folder = f'{output}/raw_data/{result_type}'
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        
+        # create a timestamp for the file name
+        stamp = int(time.time())
+        uuid_code = str(uuid.uuid4()).split('-')[-1]
+
+        # convert the data to a JSON string
+        obj = json.dumps(data, ensure_ascii=False, indent=2)
+
+        # write the JSON string to a file
+        file_path = f'{folder}/{result_type}_{stamp}_{uuid_code}.json'
+        with open(file_path, encoding='utf-8', mode='w') as writer:
+            writer.write(obj)
+    
     def collect_search_data(self) -> None:
         '''
         Collects both search results and corresponding image thumbnails.

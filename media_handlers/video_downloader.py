@@ -179,6 +179,47 @@ class VideoDownloader:
                 except Exception as e:
                     print (f'{url} generated an exception: {e}')
 
+    def _test_tor_connection(self) -> bool:
+        '''
+        Tests if Tor is available and working.
+        
+        :return: True if Tor is available and working, False otherwise.
+        '''
+        try:
+            # test if port is open
+            import socket
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex(('127.0.0.1', 9050))
+            if result != 0:
+                print('\n\n')
+                print('Tor SOCKS port (9050) is not open. Is Tor running?')
+                print('Falling back to normal connection.\n')
+                return False
+            
+            # if port is open, test connection
+            import requests
+            print('\n\nTesting Tor connection...')
+            response = requests.get(
+                'https://check.torproject.org/api/ip',
+                proxies={
+                    'http': self.proxy,
+                    'https': self.proxy
+                },
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                print(f'Tor connection successful. Exit node IP: {data.get("IP")}\n\n')
+                return True
+            else:
+                print('Tor enabled but connection check failed. Using normal connection.\n\n')
+                return False
+        
+        except Exception as e:
+            print(f'\nTor connection failed ({e}). Using normal connection.\n')
+            return False
+
     def start_download(self, urls: List[str], max_workers: int = 5) -> None:
         '''
         Starts the download process for a list of TikTok video URLs.
@@ -188,38 +229,13 @@ class VideoDownloader:
             downloading. Default is 5.
         '''
         if self.use_tor:
-            try:
-                # test if port is open
-                import socket
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                result = sock.connect_ex(('127.0.0.1', 9050))
-                if result != 0:
-                    print ('\n\n')
-                    print('Tor SOCKS port (9050) is not open. Is Tor running?')
-                    print('Falling back to normal connection.\n')
-                    self.use_tor = False
-                    return
-                
-                # if port is open, test Tor connection
-                import requests
-                print('\n\nTesting Tor connection...')
-                response = requests.get(
-                    'https://check.torproject.org/api/ip',
-                    proxies={
-                        'http': self.proxy,
-                        'https': self.proxy
-                    },
-                    timeout=10
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    print(f'Tor connection successful. Exit node IP: {data.get("IP")}\n\n')
-                else:
-                    print('Tor enabled but connection check failed. Using normal connection.\n\n')
-                    self.use_tor = False
-            except Exception as e:
-                print(f'\nTor connection failed ({e}). Using normal connection.\n')
-                self.use_tor = False
+            # test Tor connection and update use_tor flag accordingly
+            self.use_tor = self._test_tor_connection()
+            
+            # remove proxy settings if Tor connection failed
+            if not self.use_tor:
+                for options in [self.video_options, self.audio_options]:
+                    options.pop('proxy', None)
         
         print('Starting download...\n')
         

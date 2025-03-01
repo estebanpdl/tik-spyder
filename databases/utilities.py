@@ -2,6 +2,7 @@
 
 # import modules
 import re
+import json
 
 # typing
 from typing import Dict, Tuple
@@ -145,4 +146,77 @@ def get_items_from_related_content(entry: Dict) -> Tuple:
         entry.get('link', None),
         entry.get('thumbnail', None),
         entry.get('title', None)
+    )
+
+'''
+Get items and keys from apify profile data
+
+'''
+def get_items_from_apify_profile_data(entry: Dict) -> Tuple:
+    '''
+    Extracts and processes specific fields from an apify profile data entry.
+
+    :param entry: A dictionary containing the apify profile data entry.
+    :return: A tuple containing the extracted and processed values for the
+        fields.
+    '''
+    # convert lists to JSON strings
+    hashtags = entry.get('hashtags', []) or []
+    hashtags_json_str = json.dumps([h.get('name', '') for h in hashtags])
+
+
+    return (
+        entry.get('id', None),
+        entry.get('text', None),
+        entry.get('textLanguage', None),
+        entry.get('createTime', None),
+        entry.get('createTimeISO', None),
+        entry.get('isAd', None),
+        entry.get('webVideoUrl', None),
+
+        # author metadata
+        entry.get('authorMeta', {}).get('id', None),
+        entry.get('authorMeta', {}).get('name', None),
+        entry.get('authorMeta', {}).get('profileUrl', None),
+        entry.get('authorMeta', {}).get('bioLink', None),
+        entry.get('authorMeta', {}).get('signature', None),
+        entry.get('authorMeta', {}).get('nickName', None),
+        entry.get('authorMeta', {}).get('verified', None),
+        entry.get('authorMeta', {}).get('avatar', None),
+        entry.get('authorMeta', {}).get('privateAccount', None),
+        entry.get('authorMeta', {}).get('region', None),
+        entry.get('authorMeta', {}).get('following', None),
+        entry.get('authorMeta', {}).get('friends', None),
+        entry.get('authorMeta', {}).get('fans', None),
+        entry.get('authorMeta', {}).get('heart', None),
+        entry.get('authorMeta', {}).get('video', None),
+        entry.get('authorMeta', {}).get('digg', None),
+
+        # music metadata
+        entry.get('musicMeta', {}).get('musicId', None),
+        entry.get('musicMeta', {}).get('musicName', None),
+        entry.get('musicMeta', {}).get('musicAuthor', None),
+        entry.get('musicMeta', {}).get('musicOriginal', None),
+
+        # video metadata
+        entry.get('videoMeta', {}).get('duration', None),
+        entry.get('videoMeta', {}).get('coverUrl', None),
+        entry.get('videoMeta', {}).get('downloadAddr', None),
+
+        # engagement metrics
+        entry.get('diggCount', None),
+        entry.get('shareCount', None),
+        entry.get('playCount', None),
+        entry.get('collectCount', None),
+        entry.get('commentCount', None),
+
+        # hashtags
+        hashtags_json_str,
+
+        # additional metadata
+        entry.get('isSlideshow', None),
+        entry.get('isPinned', None),
+        entry.get('isSponsored', None),
+        entry.get('input', None),
+        entry.get('fromProfileSection', None)
     )

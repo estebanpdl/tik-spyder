@@ -12,8 +12,8 @@ from argparse import (
 from utils import get_config_attrs, verify_date_argument, \
     create_output_data_path
 
-# SerpAPI collector
-from serpapi_client import SerpAPICollector
+# TikTok data collector
+from data_collectors import TikTokDataCollector
 
 # video downloader
 from media_handlers import VideoDownloader
@@ -271,14 +271,14 @@ if __name__ == '__main__':
     output = args['output']
     create_output_data_path(output)
 
-    # # SerpAPICollector instance
-    serp_api_collector = SerpAPICollector(args=args)
+    # TikTokDataCollector instance
+    collector = TikTokDataCollector(args=args)
 
-    # SerpAPI call
-    serp_api_collector.collect_search_data()
+    # TikTok data collection call
+    collector.collect_search_data()
 
-    # read SQL database and generate a csv file
-    serp_api_collector.generate_data_files()
+    # read SQL database and generate csv file
+    collector.generate_data_files()
 
     # download videos
     if args['download']:
@@ -287,7 +287,7 @@ if __name__ == '__main__':
         print('Downloading videos')
 
         # get tiktok urls
-        collected_videos = serp_api_collector.get_collected_videos()
+        collected_videos = collector.get_collected_videos()
 
         if collected_videos:
             print(f'\n> Found {len(collected_videos)} videos to download.')

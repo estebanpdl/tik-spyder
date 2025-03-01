@@ -4,5 +4,6 @@ PySocks
 requests
 serpapi
 stem
+streamlit
 tqdm
 yt-dlp[default]
