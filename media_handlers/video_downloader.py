@@ -67,7 +67,7 @@ class VideoDownloader:
         self.audio_options = {
             **common_options,
             'format': 'bestaudio/best',
-            'outtmpl': self._build_output_directory(output, 'downloaded_audio'),
+            'outtmpl': self._build_output_directory(output, 'downloaded_audios'),
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',

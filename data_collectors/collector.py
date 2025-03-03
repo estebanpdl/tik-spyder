@@ -170,11 +170,11 @@ class TikTokDataCollector:
                 # chill out
                 time.sleep(2)
             
-            if not found_results:
-                print('No organic results found.')
-
             # api call status
             print ('> Done')
+
+            if not found_results:
+                print('No organic results found.')
         
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
@@ -251,11 +251,11 @@ class TikTokDataCollector:
                 # chill out
                 time.sleep(2)
 
-            if not found_results:
-                print ('No image results found in the response.')
-
             # api call status
             print ('> Done')
+
+            if not found_results:
+                print ('No image results found in the response.')
 
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
@@ -294,10 +294,11 @@ class TikTokDataCollector:
                 print (f'\n\nDownloading images results')
                 thumbnails = [i['thumbnail'] for i in d]
                 links = [i['link'] for i in d]
-                self.http_session.start_images_download(
+                self.http_session.start_media_download(
                     urls=thumbnails,
                     links=links,
-                    output=self.output
+                    output=self.output,
+                    media_type='image'
                 )
                 print ('> Done')
 
@@ -390,14 +391,17 @@ class TikTokDataCollector:
             store_data.append(item)
 
         # write raw data
-        self._save_raw_data(
-            self.output,
-            result_type='apify_profile_data',
-            data=store_data
-        )
+        if store_data:
+            self._save_raw_data(
+                self.output,
+                result_type='apify_profile_data',
+                data=store_data
+            )
 
-        # process data
-        self._process_apify_profile_data(store_data)
+            # process data
+            self._process_apify_profile_data(store_data)
+        else:
+            print ('No data found in the Apify run.')
         
     def _process_apify_profile_data(self, data: Dict) -> None:
         '''
@@ -409,11 +413,53 @@ class TikTokDataCollector:
         self.sql_database.insert_apify_profile_data(data)
 
         '''
+        - download covers/thumbnails
         - download videos
         - download audio
-        - download covers/thumbnails
         '''
-        x = 1
+
+        # downloading images
+        thumbnails = []
+        links = []
+        for item in data:
+            try:
+                thumbnails.append(item['videoMeta']['coverUrl'])
+                links.append(item['webVideoUrl'])
+            except KeyError:
+                pass
+
+        self.http_session.start_media_download(
+            urls=thumbnails,
+            links=links,
+            output=self.output,
+            media_type='image'
+        )
+        print ('> Thumbnails downloaded')
+        
+        # get videos from Apify collected data
+        if self.should_download_videos:
+            videos = []
+            tiktok_links = []
+            for item in data:
+                try:
+                    videos.append(item['videoMeta']['downloadAddr'])
+                    tiktok_links.append(item['webVideoUrl'])
+                except KeyError:
+                    pass
+
+            # download videos
+            self.http_session.start_media_download(
+                urls=videos,
+                links=tiktok_links,
+                output=self.output,
+                media_type='video'
+            )
+            print ('> Videos downloaded')
+
+            # extract audio from videos
+            print ('> Extracting audio from videos...')
+            self.http_session.extract_audio_from_videos(self.output)
+            print ('> Done')
 
         return
     

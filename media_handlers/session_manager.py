@@ -2,9 +2,11 @@
 
 # import modules
 import os
+import glob
 import aiohttp
 import asyncio
 import requests
+import subprocess
 
 # aiohttp
 from aiohttp import ClientSession
@@ -58,22 +60,35 @@ class RequestSession:
             print(f'An error occurred: {e}')
             return {}
     
-    async def fetch_image(self, session: ClientSession, url: str,
-                          filename: str) -> None:
+    def _build_media_filename_path(self, output: str, link: str, file_extension: str) -> str:
         '''
-        Fetches an image from a URL and saves it to the output directory.
+        Builds the filename path for saving the image based on the TikTok link.
+
+        :param output: The directory path where the images will be saved.
+        :param link: The TikTok link from which to extract the post ID.
+        :param file_extension: The file extension of the media file.
+        :return: The full path (including filename) where the image will be
+            saved.
+        '''
+        post_id = link.split('/')[-1].split('?')[0]
+        return f'{output}/{post_id}.{file_extension}'
+    
+    async def fetch_file(self, session: ClientSession, url: str,
+                         filename: str) -> None:
+        '''
+        Fetches a file from a URL and saves it to the output directory.
 
         :param session: The aiohttp ClientSession object.
-        :param url: The URL of the image to download.
-        :param filename: The path (including filename) where the image will be
+        :param url: The URL of the file to download.
+        :param filename: The path (including filename) where the file will be
             saved.
         '''
         try:
             async with session.get(url) as res:
                 if res.status == 200:
-                    image_data = await res.read()
+                    file_data = await res.read()
                     with open(filename, 'wb') as f:
-                        f.write(image_data)
+                        f.write(file_data)
                 else:
                     print (
                         f'Failed to download {url}, status code: {res.status}'
@@ -81,49 +96,87 @@ class RequestSession:
         except Exception as e:
             print (f'An error occurred while downloading {url}: {e}')
     
-    async def download_images(self, urls: List[str], links: List[str],
-                              output: str) -> None:
+    async def download_files(self, urls: List[str], links: List[str],
+                             output: str, file_extension: str) -> None:
         '''
-        Downloads images from a list of URLs asynchronously.
+        Downloads files from a list of URLs asynchronously.
 
-        :param urls: A list of image URLs to download.
-        :param links: A list of TikTok links corresponding to the images.
-        :param output: The directory path where the images will be saved.
+        :param urls: A list of file URLs to download.
+        :param links: A list of TikTok links corresponding to the files.
+        :param output: The directory path where the files will be saved.
+        :param file_extension: The file extension of the media file.
         '''
         async with aiohttp.ClientSession() as session:
             tasks = [
-                self.fetch_image(
+                self.fetch_file(
                     session=session, url=url,
-                    filename=self._build_filename_path(output, link)
+                    filename=self._build_media_filename_path(output, link, file_extension)
                 ) for url, link in zip(urls, links)
             ]
             await asyncio.gather(*tasks)
     
-    def _build_filename_path(self, output: str, link: str) -> str:
+    def start_media_download(self, urls: List[str], links: List[str],
+                             output: str, media_type: str) -> None:
         '''
-        Builds the filename path for saving the image based on the TikTok link.
+        Starts the asynchronous download of files from a list of URLs.
 
-        :param output: The directory path where the images will be saved.
-        :param link: The TikTok link from which to extract the post ID.
-        :return: The full path (including filename) where the image will be
-            saved.
+        :param urls: A list of file URLs to download.
+        :param links: A list of TikTok links corresponding to the files.
+        :param output: The directory path where the files will be saved.
+        :param media_type: The type of media to download.
         '''
-        post_id = link.split('/')[-1].split('?')[0]
-        return f'{output}/image_id_{post_id}.png'
+        media_object = {
+            'image': {
+                'path': 'thumbnails',
+                'file_extension': 'png'
+            },
+            'video': {
+                'path': 'downloaded_videos',
+                'file_extension': 'mp4'
+            }
+        }
 
-    def start_images_download(self, urls: List[str], links: List[str],
-                              output: str) -> None:
-        '''
-        Starts the asynchronous download of images from a list of URLs.
-
-        :param urls: A list of image URLs to download.
-        :param links: A list of TikTok links corresponding to the images.
-        :param output: The directory path where the images will be saved.
-        '''
-        path = f'{output}/tiktok_thumbnails'
+        path = f'{output}/{media_object[media_type]["path"]}'
         if not os.path.exists(path):
             os.makedirs(path)
         
+        file_extension = media_object[media_type]['file_extension']
         self.loop.run_until_complete(
-            self.download_images(urls=urls, links=links, output=path)
+            self.download_files(urls=urls, links=links, output=path,
+                                file_extension=file_extension)
         )
+
+    def extract_audio_from_videos(self, output: str) -> None:
+        '''
+        Extracts audio from video files.
+
+        :param output: The directory path where audios will be saved.
+        '''
+        # build audio path
+        audio_path = f'{output}/downloaded_audios'
+        if not os.path.exists(audio_path):
+            os.makedirs(audio_path)
+
+        # get all video files
+        path = f'{output}/downloaded_videos'
+        files = glob.glob(f'{path}/*.mp4')
+
+        # extract audio from each video
+        for file in files:
+            try:
+                # get id from video filename
+                video_id = os.path.basename(file).split('.')[0]
+
+                # FFmpeg command to extract audio
+                cmd = [
+                    'ffmpeg',
+                    '-i', file,
+                    '-q:a', '0',
+                    '-map', 'a',
+                    '-y',
+                    f'{audio_path}/{video_id}.mp3'
+                ]
+
+                subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            except Exception as e:
+                print(f'Error extracting audio: {e}')

@@ -35,13 +35,13 @@ class SQLDatabaseManager:
         self.output = output
         self.sql_database_file = f'{self.output}/database.sql'
 
-        # create required SQL tables for data processing
+        # create required SQL tables for data processing - SerpAPI
         self.create_search_results_table()
         self.create_images_results_table()
         self.create_related_content_table()
 
-        if run_apify:
-            self.create_apify_profile_scraper_table()
+        # create required SQL tables for data processing - Apify
+        self.create_apify_profile_scraper_table()
     
     def create_sql_connection(self) -> Optional[sqlite3.Connection]:
         '''
