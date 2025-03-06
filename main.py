@@ -18,8 +18,7 @@ from data_collectors import TikTokDataCollector
 # video downloader
 from media_handlers import VideoDownloader
 
-if __name__ == '__main__':
-
+def main():
     '''
     Arguments
 
@@ -304,3 +303,6 @@ if __name__ == '__main__':
 
     '''
     print ('\n\n' + ' '.join(log_text.split()).strip())
+
+if __name__ == '__main__':
+    main()

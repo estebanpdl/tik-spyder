@@ -8,3 +8,6 @@ test_data/
 
 # streamlit app
 app.py
+
+# setup file
+setup.py
