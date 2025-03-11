@@ -68,8 +68,8 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 1. Clone the repository
 
 ```sh
-git clone https://github.com/estebanpdl/TikSpyder.git
-cd TikSpyder
+git clone https://github.com/estebanpdl/tik-spyder.git
+cd tik-spyder
 ```
 
 2. Install the required packages
@@ -190,4 +190,3 @@ If you find TikSpyder helpful, please consider buying me a coffee to support ong
 [![Buy Me A Coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/estebanpdl)
 
 <br />
- 
