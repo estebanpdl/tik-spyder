@@ -59,7 +59,8 @@ def select_serpapi_parameters(args: Dict) -> Dict:
         'gl',
         'hl',
         'cr',
-        'lr'
+        'lr',
+        'safe'
     ]
 
     # filter and return only the relevant SerpAPI parameters

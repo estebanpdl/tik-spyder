@@ -80,13 +80,14 @@ class TikTokDataCollector:
         # Apify client
         self.run_apify = False
         if args['apify']:
-            self.run_apify = True
-            self.should_download_videos = args['download']
-            self.apify_client = ApifyClient(self.apify_token)
+            if self.user is not None:
+                self.run_apify = True
+                self.should_download_videos = args['download']
+                self.apify_client = ApifyClient(self.apify_token)
 
-            # optional date filters
-            self.oldest_post_date = args['oldest_post_date']
-            self.newest_post_date = args['newest_post_date']
+                # optional date filters
+                self.oldest_post_date = args['oldest_post_date']
+                self.newest_post_date = args['newest_post_date']
 
         # database connection
         self.sql_database = SQLDatabaseManager(self.output, self.run_apify)
