@@ -68,14 +68,14 @@ def main():
         help='Specify a TikTok user to search for videos from.'
     )
 
-    ''' tag '''
-    serpapi_arguments.add_argument(
-        '--tag',
-        type=str,
-        required=False,
-        metavar='',
-        help='Specify a TikTok tag to search for videos from.'
-    )
+    # ''' tag '''
+    # serpapi_arguments.add_argument(
+    #     '--tag',
+    #     type=str,
+    #     required=False,
+    #     metavar='',
+    #     help='Specify a TikTok tag to search for videos from.'
+    # )
 
     ''' google domain '''
     serpapi_arguments.add_argument(
@@ -249,13 +249,13 @@ def main():
         )
     )
 
-    ''' extract keyframes '''
-    optional_arguments.add_argument(
-        '--extract-keyframes',
-        action='store_true',
-        required=False,
-        help='Specify whether to extract keyframes from TikTok videos.'
-    )
+    # ''' extract keyframes '''
+    # optional_arguments.add_argument(
+    #     '--extract-keyframes',
+    #     action='store_true',
+    #     required=False,
+    #     help='Specify whether to extract keyframes from TikTok videos.'
+    # )
 
     ''' output '''
     optional_arguments.add_argument(
