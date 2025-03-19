@@ -10,17 +10,29 @@ from typing import Dict
 from configparser import ConfigParser
 from datetime import datetime
 
+def get_project_root():
+    """Get the project root directory."""
+    # Get the directory where main.py is located
+    current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return current_dir
+
 '''
 Get configuration attributes
 
 '''
-def get_config_attrs() -> Dict:
+def get_config_attrs(config_dir=None) -> Dict:
     '''
     Retrieves configuration attributes from configuration files.
 
+    :param config_dir: Optional path to the config directory.
+                       If None, uses the default path.
     :return: A dictionary containing the SerpAPI and Apify credentials.
     '''
-    path = './config/config.ini'
+    if config_dir is None:
+        project_root = get_project_root()
+        config_dir = os.path.join(project_root, 'config')
+    
+    path = os.path.join(config_dir, 'config.ini')
 
     # config parser
     config = ConfigParser()

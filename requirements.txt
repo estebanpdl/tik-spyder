@@ -1,4 +1,5 @@
 aiohttp
+apify-client
 pandas
 PySocks
 requests

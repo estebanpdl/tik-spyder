@@ -2,6 +2,7 @@
 
 # import modules
 import time
+import os
 
 # import argparse
 from argparse import (
@@ -10,7 +11,7 @@ from argparse import (
 
 # import utils
 from utils import get_config_attrs, verify_date_argument, \
-    create_output_data_path
+    create_output_data_path, get_project_root
 
 # TikTok data collector
 from data_collectors import TikTokDataCollector
@@ -19,6 +20,19 @@ from data_collectors import TikTokDataCollector
 from media_handlers import VideoDownloader
 
 def main():
+    # Get current working directory (where command was executed)
+    execution_dir = os.getcwd()
+    
+    # Get project root directory (where the package is installed)
+    project_root = get_project_root()
+    
+    # Set up project paths for later use instead of changing directories
+    project_paths = {
+        'root': project_root,
+        'config': os.path.join(project_root, 'config'),
+        'execution': execution_dir
+    }
+    
     '''
     Arguments
 
@@ -263,11 +277,11 @@ def main():
         '--output',
         type=str,
         required=False,
-        default=f'./data/{int(time.time())}',
+        default=f'./tikspyder-data/{int(time.time())}',
         metavar='',
         help=(
             "Specify the output directory path. If not provided, data is "
-            "saved in a timestamped subdirectory within the './data/' "
+            "saved in a timestamped subdirectory within the './tikspyder-data/' "
             "directory."
         )
     )
@@ -278,9 +292,9 @@ def main():
     # validate that either a username or search query was provided
     if args['user'] is None and args['q'] is None:
         raise ValueError('Either --user or --q must be provided.')
-
+    
     # merging SerpAPI configuration attrs with the existing arguments
-    config_attrs = get_config_attrs()
+    config_attrs = get_config_attrs(project_paths['config'])
     args = {**args, **config_attrs}
 
     # verify provided dates
