@@ -217,7 +217,7 @@ class RequestSession:
                     cmd = [
                         'ffmpeg',
                         '-i', file,
-                        '-vf', 'select=eq(pict_type\,I)',
+                        '-vf', 'select=eq(pict_type\\,I)',
                         '-vsync', 'vfr',
                         '-q:v', '2',
                         f'{video_keyframes_dir}/keyframe_%04d.jpg'
