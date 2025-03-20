@@ -272,9 +272,9 @@ def main():
         default=f'./tikspyder-data/{int(time.time())}',
         metavar='',
         help=(
-            "Specify the output directory path. If not provided, data is "
-            "saved in a timestamped subdirectory within the './tikspyder-data/' "
-            "directory."
+            "Specify output directory path. If not provided, data is "
+            "saved in the current working directory in a folder named "
+            "tikspyder-data"
         )
     )
 
