@@ -127,6 +127,7 @@ SerpAPI options:
   --gl                 Defines the country to use for the search. Two-letter country code.
   --hl                 Defines the language to use for the search. Two-letter language code.
   --cr                 Defines one or multiple countries to limit the search to.
+  --safe               Level of filtering for adult content. Options: active (default), off
   --lr                 Defines one or multiple languages to limit the search to.
   --depth              Depth of iterations to follow related content links.
 
@@ -140,10 +141,10 @@ Optional Apify arguments:
   --newest-post-date   Filter posts older than the specified date. Format: YYYY-MM-DD.
 
 Optional arguments and parameters:
-  -o , --output        Specify the output directory path. If not provided, data is saved in a timestamped subdirectory within the './data/' directory.
-  -d, --download       Specify whether to download TikTok videos from SerpAPI and Apify.
-  -w , --max-workers   Specify the maximum number of threads to use for downloading TikTok videos.
   --use-tor            Specify whether to use Tor for downloading TikTok videos.
+  -d, --download       Specify whether to download TikTok videos from SerpAPI and Apify.
+  -w, --max-workers    Specify the maximum number of threads to use for downloading TikTok videos and extracting keyframes.
+  -o, --output         Specify the output directory path. If not provided, data is saved in a timestamped subdirectory within the './tikspyder-data/' directory.
 ```
 
 ### **Example Usage**
