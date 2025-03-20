@@ -60,6 +60,7 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 - [Tor Browser](https://www.torproject.org/) (optional)
 - [ffmpeg](https://ffmpeg.org/)
 - Install the required Python libraries listed in `requirements.txt`.
+- For the GUI app, tkinter is required. On Linux, install with `sudo apt-get install python3-tk` (Ubuntu/Debian) or your distribution's equivalent package.
 
 <br />
 

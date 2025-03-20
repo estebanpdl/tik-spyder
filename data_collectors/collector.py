@@ -175,7 +175,7 @@ class TikTokDataCollector:
             print ('> Done')
 
             if not found_results:
-                print('No organic results found.')
+                print ('No organic results found.')
         
         except Exception as e:
             print (f'An error occurred during the API call: {e}')
@@ -227,6 +227,7 @@ class TikTokDataCollector:
             self._process_images_results(api_response.data)
             if api_response.data.get('images_results', []):
                 found_results = True
+                print (f'> Downloading images results...')
 
             # get next page
             next_page = api_response.next_page_url
@@ -292,7 +293,6 @@ class TikTokDataCollector:
                 self.sql_database.insert_images_results(d)
 
                 # download images
-                print (f'\n\nDownloading images results')
                 thumbnails = [i['thumbnail'] for i in d]
                 links = [i['link'] for i in d]
                 self.http_session.start_media_download(
@@ -301,7 +301,6 @@ class TikTokDataCollector:
                     output=self.output,
                     media_type='image'
                 )
-                print ('> Done')
 
                 # save related content urls
                 key = 'serpapi_related_content_link'
@@ -494,9 +493,9 @@ class TikTokDataCollector:
         '''
         Collects both search results and corresponding image thumbnails.
         '''
-        print('\n\n')
-        print('-' * 30)
-        print('Starting data collection process...\n')
+        print ('\n\n')
+        print ('-' * 30)
+        print ('Starting data collection process...\n')
 
         self.collect_search_results()
         self.collect_image_results()
@@ -504,8 +503,8 @@ class TikTokDataCollector:
         if self.run_apify:
             self._apify_tiktok_profile_scraper()
 
-        print('\n\nData collection complete.')
-        print('-' * 30)
+        print ('\n\nData collection complete.')
+        print ('-' * 30)
 
     def generate_data_files(self) -> None:
         '''

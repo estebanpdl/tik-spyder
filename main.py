@@ -17,7 +17,7 @@ from utils import get_config_attrs, verify_date_argument, \
 from data_collectors import TikTokDataCollector
 
 # video downloader
-from media_handlers import VideoDownloader
+from media_handlers import VideoDownloader, RequestSession
 
 def main():
     # Get current working directory (where command was executed)
@@ -259,17 +259,9 @@ def main():
         metavar='',
         help=(
             "Specify the maximum number of threads to use for downloading "
-            "TikTok videos."
+            "TikTok videos and extracting keyframes."
         )
     )
-
-    # ''' extract keyframes '''
-    # optional_arguments.add_argument(
-    #     '--extract-keyframes',
-    #     action='store_true',
-    #     required=False,
-    #     help='Specify whether to extract keyframes from TikTok videos.'
-    # )
 
     ''' output '''
     optional_arguments.add_argument(
@@ -302,7 +294,7 @@ def main():
         if args[date_key] is not None:
             verify_date_argument(args, date_key)
     
-    # Start process
+    # start process
     log_text = f'''
     > Starting program at: {time.ctime()}
 
@@ -324,23 +316,38 @@ def main():
 
     # download videos
     if args['download']:
-        print ('\n\n')
-        print('-' * 30)
-        print('Downloading videos')
+        print ('')
+        print ('-' * 30)
+        print ('> Downloading videos...')
 
         # get tiktok urls
         collected_videos = collector.get_collected_videos()
 
         if collected_videos:
-            print(f'\n> Found {len(collected_videos)} videos to download.')
+            print (f'\n> Found {len(collected_videos)} videos to download.')
+
+            # define max workers
+            max_workers = args['max_workers'] if args['max_workers'] else 5
             downloader = VideoDownloader(output=output, use_tor=args['use_tor'])
 
             # start download
-            downloader.start_download(urls=collected_videos)
+            downloader.start_download(urls=collected_videos, max_workers=max_workers)
         else:
-            print('\n> Search results did not return any videos to download.')
+            print ('\n> Search results did not return any videos to download.')
+        
+        # extract keyframes
+        print ('\n')
+        print ('-' * 30)
+        print ('Extracting keyframes...')
+        request_session = RequestSession()
 
-    # End process
+        # define max workers
+        max_workers = args['max_workers'] if args['max_workers'] else 3
+        request_session.extract_keyframes_from_videos(output=output, max_concurrent=max_workers)
+        print ('\n')
+        print ('-' * 30)
+
+    # end process
     log_text = f'''
     > Ending program at: {time.ctime()}
 

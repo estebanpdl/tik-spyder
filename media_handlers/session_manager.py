@@ -8,6 +8,9 @@ import asyncio
 import requests
 import subprocess
 
+# progress bar
+from tqdm import tqdm
+
 # aiohttp
 from aiohttp import ClientSession
 
@@ -57,7 +60,7 @@ class RequestSession:
                 content = fetch_content(see_more_link)
             return content
         except requests.RequestException as e:
-            print(f'An error occurred: {e}')
+            print (f'An error occurred: {e}')
             return {}
     
     def _build_media_filename_path(self, output: str, link: str, file_extension: str) -> str:
@@ -179,4 +182,75 @@ class RequestSession:
 
                 subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except Exception as e:
-                print(f'Error extracting audio: {e}')
+                print (f'Error extracting audio: {e}')
+
+    def extract_keyframes_from_videos(self, output: str, max_concurrent: int) -> None:
+        '''
+        Extracts keyframes from video files.
+
+        :param output: The directory path where keyframes will be saved.
+        :param max_concurrent: Maximum number of concurrent ffmpeg processes.
+        '''
+        # build keyframes path
+        keyframes_path = f'{output}/keyframes'
+        if not os.path.exists(keyframes_path):
+            os.makedirs(keyframes_path)
+
+        # get all video files
+        path = f'{output}/downloaded_videos'
+        files = glob.glob(f'{path}/*.mp4')
+
+        # videos ids already processed
+        processed_videos = [i.split('\\')[-1] for i in glob.glob(f'{keyframes_path}/*')]
+
+        async def extract_keyframes(file, pbar):
+            try:
+                # get id from video filename
+                video_id = os.path.basename(file).split('.')[0]
+                if video_id not in processed_videos:
+                    # Create subdirectory for this video_id
+                    video_keyframes_dir = f'{keyframes_path}/{video_id}'
+                    if not os.path.exists(video_keyframes_dir):
+                        os.makedirs(video_keyframes_dir)
+                    
+                    # FFmpeg command to extract keyframes
+                    cmd = [
+                        'ffmpeg',
+                        '-i', file,
+                        '-vf', 'select=eq(pict_type\,I)',
+                        '-vsync', 'vfr',
+                        '-q:v', '2',
+                        f'{video_keyframes_dir}/keyframe_%04d.jpg'
+                    ]
+
+                    # Run FFmpeg as async subprocess
+                    process = await asyncio.create_subprocess_exec(
+                        *cmd,
+                        stdout=asyncio.subprocess.PIPE,
+                        stderr=asyncio.subprocess.PIPE
+                    )
+                    await process.communicate()
+            except Exception as e:
+                print (f'Error extracting keyframes: {e}')
+            finally:
+                pbar.update(1)
+
+        async def process_all_videos():
+            # Create progress bar in the main thread
+            pbar = tqdm(total=len(files), desc="Extracting keyframes", unit="video")
+            
+            # Use semaphore to limit concurrent processes
+            semaphore = asyncio.Semaphore(max_concurrent)
+            
+            async def process_with_semaphore(file):
+                async with semaphore:
+                    await extract_keyframes(file, pbar)
+            
+            # Create tasks for all videos
+            tasks = [process_with_semaphore(file) for file in files]
+            await asyncio.gather(*tasks)
+            
+            pbar.close()
+
+        # Run the async event loop
+        asyncio.run(process_all_videos())
