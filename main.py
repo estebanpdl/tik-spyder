@@ -82,14 +82,14 @@ def main():
         help='Specify a TikTok user to search for videos from.'
     )
 
-    # ''' tag '''
-    # serpapi_arguments.add_argument(
-    #     '--tag',
-    #     type=str,
-    #     required=False,
-    #     metavar='',
-    #     help='Specify a TikTok tag to search for videos from.'
-    # )
+    ''' tag '''
+    serpapi_arguments.add_argument(
+        '--tag',
+        type=str,
+        required=False,
+        metavar='',
+        help='Specify a TikTok tag to search for videos from.'
+    )
 
     ''' google domain '''
     serpapi_arguments.add_argument(
@@ -281,9 +281,13 @@ def main():
     # parse arguments
     args = vars(parser.parse_args())
 
-    # validate that either a username or search query was provided
-    if args['user'] is None and args['q'] is None:
-        raise ValueError('Either --user or --q must be provided.')
+    # validate that either a query, username or tag was provided
+    if all(arg is None for arg in [args['user'], args['q'], args['tag']]):
+        raise ValueError('Either --user, --q or --tag must be provided.')
+    
+    # raise error if both user and tag are provided
+    if args['user'] and args['tag']:
+        raise ValueError('Both --user and --tag were provided. Only one can be used.')
     
     # merging SerpAPI configuration attrs with the existing arguments
     config_attrs = get_config_attrs(project_paths['config'])

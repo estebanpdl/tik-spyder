@@ -9,17 +9,22 @@ import uuid
 # typing
 from typing import Dict, List
 
-# SerpAPI utilities
-from .utilities import search_query, select_serpapi_parameters, \
-    extract_results_keys, extract_related_content_keys
-
 # SerpAPI module
 import serpapi
 
 # Apify client
 from apify_client import ApifyClient
 
-# pathlib
+# local dependencies
+from .utilities import (
+    search_query,
+    select_serpapi_parameters,
+    extract_results_keys,
+    extract_related_content_keys,
+    build_site_query
+)
+
+# utils
 from pathlib import Path
 
 # SQLManager
@@ -58,15 +63,12 @@ class TikTokDataCollector:
         # build the search query string
         q = search_query(args=args)
 
-        # get provided user
+        # get provided user and tag
         self.user = args['user']
-        if self.user is not None:
-            self.user = self.user[1:] if self.user.startswith('@') \
-                else self.user
+        self.tag = args['tag']
 
-        # build advanced search query
-        self.query = f'site:{self.site}/* {q}' if self.user is None \
-            else f'site:{self.site}/@{self.user}/* {q}'
+        # build advanced search query using utility function
+        self.query = build_site_query(site=self.site, user=self.user, tag=self.tag, q=q)
 
         # update the query parameter in args
         args['q'] = self.query

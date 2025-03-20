@@ -27,6 +27,28 @@ def advanced_search_options(args: Dict) -> str:
     ]
 
     return ' '.join(response)
+
+def build_site_query(site: str, user: str = None, tag: str = None, q: str = '') -> str:
+    '''
+    Builds a site-specific search query based on the provided parameters.
+
+    :param site: TikTok's site domain.
+    :param user: Optional username to search for content from a specific user.
+    :param tag: Optional tag to search for content with a specific tag.
+    :param q: Optional search terms to include in the query.
+    :return: A formatted site search query string.
+    '''
+    if user is not None:
+        # remove @ prefix if present
+        clean_user = user[1:] if user.startswith('@') else user
+        return f'site:{site}/@{clean_user}/* {q}'.strip()
+    elif tag is not None:
+        # remove # prefix if present
+        clean_tag = tag[1:] if tag.startswith('#') else tag
+        return f'site:{site}/tag/* {clean_tag} {q}'.strip()
+    else:
+        # normal site search
+        return f'site:{site}/* {q}'.strip()
         
 def search_query(args: Dict) -> str:
     '''
@@ -39,7 +61,6 @@ def search_query(args: Dict) -> str:
     advanced_search = advanced_search_options(args)
 
     return f'{q} {advanced_search}'.strip()
-
 
 '''
 Select SerpAPI parameters
@@ -71,6 +92,7 @@ def select_serpapi_parameters(args: Dict) -> Dict:
     # add new parameters
     params['engine'] = 'google'
     params['start'] = 0
+    params['nfpr'] = 1
     params['num'] = 100
 
     return params
