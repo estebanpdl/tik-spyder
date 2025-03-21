@@ -1,10 +1,7 @@
 # Ignore Cache
-__pycache__/
 .ipynb_checkpoints/
+__pycache__/
 .vscode/
-
-# data
-test_data/
 
 # streamlit app
 app.py
