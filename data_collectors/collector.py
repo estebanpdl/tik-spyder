@@ -5,6 +5,7 @@ import os
 import time
 import json
 import uuid
+import httpx
 
 # typing
 from typing import Dict, List
@@ -80,10 +81,9 @@ class TikTokDataCollector:
         self.client = serpapi.Client(api_key=self.api_key)
 
         # Apify client
-        self.run_apify = False
-        if args['apify']:
+        self.run_apify = args['apify']
+        if self.run_apify:
             if self.user is not None:
-                self.run_apify = True
                 self.should_download_videos = args['download']
                 self.apify_client = ApifyClient(self.apify_token)
 
@@ -383,27 +383,30 @@ class TikTokDataCollector:
 
         # run the Apify actor
         apify_actor_key = '0FXVyOXXEmdGcV88a'
-        run = self.apify_client.actor(apify_actor_key).call(
-            run_input=run_input
-        )
-
-        # store data
-        store_data = []
-        for item in self.apify_client.dataset(run['defaultDatasetId']).iterate_items():
-            store_data.append(item)
-
-        # write raw data
-        if store_data:
-            self._save_raw_data(
-                self.output,
-                result_type='apify_profile_data',
-                data=store_data
+        try:
+            run = self.apify_client.actor(apify_actor_key).call(
+                run_input=run_input
             )
 
-            # process data
-            self._process_apify_profile_data(store_data)
-        else:
-            print ('No data found in the Apify run.')
+            # store data
+            store_data = []
+            for item in self.apify_client.dataset(run['defaultDatasetId']).iterate_items():
+                store_data.append(item)
+
+            # write raw data
+            if store_data:
+                self._save_raw_data(
+                    self.output,
+                    result_type='apify_profile_data',
+                    data=store_data
+                )
+
+                # process data
+                self._process_apify_profile_data(store_data)
+            else:
+                print ('No data found in the Apify run.')
+        except httpx.LocalProtocolError as e:
+            print ('Warning: Apify API token is either missing or invalid. Skipping Apify integration.')
         
     def _process_apify_profile_data(self, data: Dict) -> None:
         '''
