@@ -253,4 +253,4 @@ class RequestSession:
             pbar.close()
 
         # Run the async event loop
-        asyncio.run(process_all_videos())
+        self.loop.run_until_complete(process_all_videos())
