@@ -417,12 +417,6 @@ class TikTokDataCollector:
         # insert data into SQL database
         self.sql_database.insert_apify_profile_data(data)
 
-        '''
-        - download covers/thumbnails
-        - download videos
-        - download audio
-        '''
-
         # downloading images
         thumbnails = []
         links = []
