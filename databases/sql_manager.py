@@ -412,11 +412,13 @@ class SQLDatabaseManager:
             finally:
                 conn.close()
         
-    def get_collected_videos(self) -> List:
+    def get_collected_videos(self, include_user_related_content: bool) -> List:
         '''
         Retrieves all unique video links from the query_search_results and
         images_results tables.
 
+        :param include_user_related_content: Whether to include user related
+            content from Google search results in the returned list of links.
         :return: A list of unique video links.
         '''
         data = []
@@ -438,6 +440,26 @@ class SQLDatabaseManager:
             
                 # fetch all links
                 all_links = [i[0] for i in cursor.fetchall()]
+
+                if include_user_related_content:
+                    # get user from link
+                    user = extract_author_post_id(all_links[0])[0]
+
+                    # get all user related content links from database that match the user's TikTok video pattern
+                    cursor.execute(
+                        '''
+                        SELECT link
+                        FROM related_content
+                        WHERE link LIKE ?
+                        ''',
+                        (f'https://www.tiktok.com/@{user}/video/%',)
+                    )
+
+                    # fetch all links
+                    all_links.extend([i[0] for i in cursor.fetchall()])
+
+                    # remove duplicates
+                    all_links = list(set(all_links))
 
                 # get list of already downloaded videos
                 videos_dir = os.path.join(self.output, 'downloaded_videos')
@@ -463,4 +485,3 @@ class SQLDatabaseManager:
                 conn.close()
         
         return data
-

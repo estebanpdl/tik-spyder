@@ -519,5 +519,6 @@ class TikTokDataCollector:
 
         :return: A list of unique video links.
         '''
-        return self.sql_database.get_collected_videos()
-    
+        return self.sql_database.get_collected_videos(
+            include_user_related_content=self.user is not None
+        )
