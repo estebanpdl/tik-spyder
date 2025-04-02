@@ -522,3 +522,10 @@ class TikTokDataCollector:
         return self.sql_database.get_collected_videos(
             include_user_related_content=self.user is not None
         )
+    
+    def get_all_collected_videos(self) -> List[str]:
+        '''
+        Retrieves all unique video links from the query_search_results,
+        images_results, and Apify tables.
+        '''
+        return self.sql_database.get_all_collected_videos()

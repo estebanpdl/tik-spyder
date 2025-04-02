@@ -350,7 +350,7 @@ def main():
         request_session.extract_keyframes_from_videos(output=output, max_concurrent=max_workers)
         print ('\n')
         print ('-' * 30)
-
+    
     # end process
     log_text = f'''
     > Ending program at: {time.ctime()}

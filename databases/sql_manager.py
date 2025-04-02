@@ -415,7 +415,7 @@ class SQLDatabaseManager:
     def get_collected_videos(self, include_user_related_content: bool) -> List:
         '''
         Retrieves all unique video links from the query_search_results and
-        images_results tables.
+        images_results tables that have not been downloaded yet.
 
         :param include_user_related_content: Whether to include user related
             content from Google search results in the returned list of links.
@@ -485,3 +485,41 @@ class SQLDatabaseManager:
                 conn.close()
         
         return data
+
+    def get_all_collected_videos(self) -> List:
+        '''
+        Retrieves all unique video links from the query_search_results,
+        images_results, and Apify tables.
+        '''
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                # get all video links from database
+                cursor.execute(
+                    '''
+                    SELECT web_video_url
+                    FROM apify_profile_scraper
+                    UNION
+                    SELECT link
+                    FROM query_search_results
+                    UNION
+                    SELECT link
+                    FROM images_results
+                    '''
+                )
+
+                # fetch all links
+                all_links = [i[0] for i in cursor.fetchall()]
+
+                # remove duplicates
+                all_links = list(set(all_links))
+
+                return all_links
+            except Error as e:
+                print (f'An error occurred while retrieving data: {e}')
+            finally:
+                conn.close()
+        
+        return []

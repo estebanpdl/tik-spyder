@@ -45,7 +45,7 @@ def build_site_query(site: str, user: str = None, tag: str = None, q: str = '') 
     elif tag is not None:
         # remove # prefix if present
         clean_tag = tag[1:] if tag.startswith('#') else tag
-        return f'site:{site}/tag/* {clean_tag} {q}'.strip()
+        return f'site:{site}/tag/{clean_tag}/* {q}'.strip()
     else:
         # normal site search
         return f'site:{site}/* {q}'.strip()
@@ -173,15 +173,3 @@ def extract_related_content_keys(data: List[Dict]) -> List[Dict]:
             k: i[k] for k in key_mapping if k in i
         } for i in data
     ]
-
-'''
-Build path to save image
-
-'''
-def build_filename_path(data: List[Dict]) -> str:
-    '''
-
-    :param data: List of dictionaries containing filtered data keys for
-        image results.
-    '''
-    pass

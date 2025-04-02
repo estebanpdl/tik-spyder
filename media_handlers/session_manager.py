@@ -208,7 +208,7 @@ class RequestSession:
                 # get id from video filename
                 video_id = os.path.basename(file).split('.')[0]
                 if video_id not in processed_videos:
-                    # Create subdirectory for this video_id
+                    # create subdirectory for this video_id
                     video_keyframes_dir = f'{keyframes_path}/{video_id}'
                     if not os.path.exists(video_keyframes_dir):
                         os.makedirs(video_keyframes_dir)
@@ -223,7 +223,7 @@ class RequestSession:
                         f'{video_keyframes_dir}/keyframe_%04d.jpg'
                     ]
 
-                    # Run FFmpeg as async subprocess
+                    # run FFmpeg as async subprocess
                     process = await asyncio.create_subprocess_exec(
                         *cmd,
                         stdout=asyncio.subprocess.PIPE,
@@ -236,21 +236,21 @@ class RequestSession:
                 pbar.update(1)
 
         async def process_all_videos():
-            # Create progress bar in the main thread
-            pbar = tqdm(total=len(files), desc="Extracting keyframes", unit="video")
+            # create progress bar in the main thread
+            pbar = tqdm(total=len(files), desc='Extracting keyframes', unit='video')
             
-            # Use semaphore to limit concurrent processes
+            # use semaphore to limit concurrent processes
             semaphore = asyncio.Semaphore(max_concurrent)
             
             async def process_with_semaphore(file):
                 async with semaphore:
                     await extract_keyframes(file, pbar)
             
-            # Create tasks for all videos
+            # create tasks for all videos
             tasks = [process_with_semaphore(file) for file in files]
             await asyncio.gather(*tasks)
             
             pbar.close()
 
-        # Run the async event loop
+        # run the async event loop
         self.loop.run_until_complete(process_all_videos())
