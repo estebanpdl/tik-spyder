@@ -23,6 +23,13 @@
 </div>
 
 <hr />
+
+## 🔧 **Companion Tools**
+
+| Tool | Description | Access |
+|------|-------------|--------|
+| 🎙️ Audio Transcription | Transcribe audio files from TikTok videos | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1qMcMsS2YI9btXGfFN1sCviQeB7RSKqUH) |
+
 <br />
 
 ## 🔍 **Description**
