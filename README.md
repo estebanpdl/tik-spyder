@@ -73,6 +73,8 @@ To get the most out of TikSpyder, **it is recommended to test your query using G
 
 ## 🔧 **Installation**
 
+### **Method 1: Standard Installation**
+
 1. Clone the repository
 
 ```sh
@@ -92,6 +94,33 @@ or
 pip3 install -r requirements.txt
 ```
 
+### **Method 2: Package Installation (Recommended)**
+
+This method installs TikSpyder as a package, making the `tikspyder` command available from anywhere on your system.
+
+1. Clone the repository
+
+```sh
+git clone https://github.com/estebanpdl/tik-spyder.git
+cd tik-spyder
+```
+
+2. Install the package in editable mode
+
+```sh
+pip install -e .
+```
+
+or
+
+```sh
+pip3 install -e .
+```
+
+After installation, you can use `tikspyder` directly from any directory instead of `python main.py`.
+
+### **Configuration**
+
 3. Once you obtain an API key from SerpAPI and Apify, populate the config/config.ini file with the described values. Replace `api_key_value` and `apify_token_value` with your API key and token.
 
 ```ini
@@ -107,6 +136,14 @@ apify_token = your_apify_token
 
 ## 📚 **Usage**
 
+### **Using Package Installation (Method 2)**
+
+```sh
+tikspyder [OPTIONS]
+```
+
+### **Using Standard Installation (Method 1)**
+
 ```sh
 python main.py [OPTIONS]
 ```
@@ -114,10 +151,16 @@ python main.py [OPTIONS]
 ### **Command Line Arguments**
 
 ```sh
+# Package installation
+tikspyder --help
+
+# or
+tikspyder -h
+
+# Standard installation
 python main.py --help
 
 # or
-
 python main.py -h
 ```
 
@@ -130,6 +173,7 @@ Help options:
 SerpAPI options:
   --q                  The search term of phrase for which to retrieve TikTok data.
   --user               Specify a TikTok user to search for videos from.
+  --tag                Specify a TikTok tag to search for videos from.
   --google-domain      Defines the Google domain to use. It defaults to google.com.
   --gl                 Defines the country to use for the search. Two-letter country code.
   --hl                 Defines the language to use for the search. Two-letter language code.
@@ -151,7 +195,7 @@ Optional arguments and parameters:
   --use-tor            Specify whether to use Tor for downloading TikTok videos.
   -d, --download       Specify whether to download TikTok videos from SerpAPI and Apify.
   -w, --max-workers    Specify the maximum number of threads to use for downloading TikTok videos and extracting keyframes.
-  -o, --output         Specify the output directory path. If not provided, data is saved in a timestamped subdirectory within the './tikspyder-data/' directory.
+  -o, --output         Specify output directory path. If not provided, data is saved in the current working directory in a folder named `tikspyder-data`
 ```
 
 ### **Example Usage**
@@ -159,6 +203,10 @@ Optional arguments and parameters:
 1. Search-based collection:
 
 ```sh
+# Using package installation (Method 2)
+tikspyder --q "F-16 AND Enemy AND (Ukraine OR Russia)" --gl us --hl en --after 2024-02-01 --before 2024-05-31 --output {output_directory}/ --download
+
+# Using standard installation (Method 1)
 python main.py --q "F-16 AND Enemy AND (Ukraine OR Russia)" --gl us --hl en --after 2024-02-01 --before 2024-05-31 --output {output_directory}/ --download
 
 # Note: Replace '{output_directory}' with the desired output path.
@@ -167,6 +215,10 @@ python main.py --q "F-16 AND Enemy AND (Ukraine OR Russia)" --gl us --hl en --af
 2. Profile-based collection:
 
 ```sh
+# Using package installation (Method 2)
+tikspyder --q Trump --user username --output {output_directory}/ --download --apify --oldest-post-date 2025-01-01
+
+# Using standard installation (Method 1)
 python main.py --q Trump --user username --output {output_directory}/ --download --apify --oldest-post-date 2025-01-01
 
 # Note: Replace '{output_directory}' with the desired output path.
