@@ -368,7 +368,7 @@ class TikTokDataCollector:
             'profiles': [self.user],
             'profileScrapeSections': ['videos'],
             'profileSorting': 'latest',
-            'resultsPerPage': 50,
+            'resultsPerPage': 100,
             'excludePinnedPosts': False,
             'shouldDownloadVideos': self.should_download_videos,
             'shouldDownloadCovers': True,
