@@ -14,7 +14,8 @@ from typing import List, Optional
 # Database Manager utilities
 from .utilities import get_items_from_search_results, \
     get_items_from_images_results, get_items_from_related_content, \
-    get_items_from_apify_profile_data, extract_author_post_id
+    get_items_from_apify_profile_data, get_items_from_apify_hashtag_data, \
+    extract_author_post_id
 
 # SQLDatabaseManager class
 class SQLDatabaseManager:
@@ -42,6 +43,7 @@ class SQLDatabaseManager:
 
         # create required SQL tables for data processing - Apify
         self.create_apify_profile_scraper_table()
+        self.create_apify_hashtag_scraper_table()
     
     def create_sql_connection(self) -> Optional[sqlite3.Connection]:
         '''
@@ -333,6 +335,80 @@ class SQLDatabaseManager:
         else:
             print ('Failed to create the database connection.')
 
+    def create_apify_hashtag_scraper_table(self) -> None:
+        '''
+        Creates the apify_hashtag_scraper table if it does not already exist.
+        '''
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                cursor.execute(
+                    '''
+                    CREATE TABLE IF NOT EXISTS apify_hashtag_scraper (
+                        id TEXT PRIMARY KEY,
+                        text TEXT,
+                        text_language TEXT,
+                        create_time INTEGER,
+                        create_time_iso TEXT,
+                        is_ad BOOLEAN,
+                        web_video_url TEXT UNIQUE,
+
+                        author_id TEXT,
+                        author_name TEXT,
+                        author_profile_url TEXT,
+                        author_bio_link TEXT,
+                        author_signature TEXT,
+                        author_nickname TEXT,
+                        author_verified BOOLEAN,
+                        author_avatar TEXT,
+                        author_private_account BOOLEAN,
+                        author_region TEXT,
+                        author_following INTEGER,
+                        author_friends INTEGER,
+                        author_fans INTEGER,
+                        author_heart INTEGER,
+                        author_video INTEGER,
+                        author_digg INTEGER,
+
+                        music_id TEXT,
+                        music_name TEXT,
+                        music_author TEXT,
+                        music_original BOOLEAN,
+
+                        video_duration INTEGER,
+                        video_thumbnail TEXT,
+                        video_download_url TEXT,
+
+                        digg_count INTEGER,
+                        share_count INTEGER,
+                        play_count INTEGER,
+                        collect_count INTEGER,
+                        comment_count INTEGER,
+
+                        hashtags TEXT,
+                        is_slideshow BOOLEAN,
+                        is_pinned BOOLEAN,
+                        is_sponsored BOOLEAN,
+                        input_search TEXT,
+                        search_hashtag_views INTEGER,
+
+                        UNIQUE (id, web_video_url)
+                        ON CONFLICT REPLACE
+                    );
+                    '''
+                )
+
+                # commit changes
+                conn.commit()
+            except Error as e:
+                print (f'An error occurred: {e}')
+            finally:
+                conn.close()
+        else:
+            print ('Failed to create the database connection.')
+
     def insert_apify_profile_data(self, data: List) -> None:
         '''
         Inserts data into the apify_profile_scraper table.
@@ -377,6 +453,51 @@ class SQLDatabaseManager:
                 conn.close()
         else:
             print ('Failed to create the database connection.')
+
+    def insert_apify_hashtag_data(self, data: List) -> None:
+        '''
+        Inserts data into the apify_hashtag_scraper table.
+
+        :param data: A list of dictionaries containing the data to insert.
+        '''
+        conn = self.create_sql_connection()
+        if conn is not None:
+            cursor = conn.cursor()
+
+            try:
+                for entry in data:
+                    cursor.execute(
+                        '''
+                        INSERT OR REPLACE INTO apify_hashtag_scraper (
+                            id, text, text_language, create_time, create_time_iso,
+                            is_ad, web_video_url, author_id, author_name,
+                            author_profile_url, author_bio_link, author_signature,
+                            author_nickname, author_verified, author_avatar,
+                            author_private_account, author_region, author_following,
+                            author_friends, author_fans, author_heart, author_video,
+                            author_digg, music_id, music_name, music_author,
+                            music_original, video_duration, video_thumbnail,
+                            video_download_url, digg_count, share_count, play_count,
+                            collect_count, comment_count, hashtags, is_slideshow,
+                            is_pinned, is_sponsored, input_search,
+                            search_hashtag_views
+                        ) VALUES (
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                        )
+                        ''',
+                        get_items_from_apify_hashtag_data(entry)
+                    )
+
+                    # commit changes
+                    conn.commit()
+            except Error as e:
+                print (f'An error occurred while inserting data: {e}')
+            finally:
+                conn.close()
+        else:
+            print ('Failed to create the database connection.')
     
     def fetch_all_data(self) -> None:
         '''
@@ -386,7 +507,8 @@ class SQLDatabaseManager:
             'query_search_results',
             'images_results',
             'related_content',
-            'apify_profile_scraper'
+            'apify_profile_scraper',
+            'apify_hashtag_scraper'
         ]
         conn = self.create_sql_connection()
         if conn is not None:
@@ -501,6 +623,9 @@ class SQLDatabaseManager:
                     '''
                     SELECT web_video_url
                     FROM apify_profile_scraper
+                    UNION
+                    SELECT web_video_url
+                    FROM apify_hashtag_scraper
                     UNION
                     SELECT link
                     FROM query_search_results

@@ -69,7 +69,9 @@ class TikTokDataCollector:
         self.tag = args['tag']
 
         # build advanced search query using utility function
-        self.query = build_site_query(site=self.site, user=self.user, tag=self.tag, q=q)
+        self.query = build_site_query(
+            site=self.site, user=self.user, tag=self.tag, q=q
+        )
 
         # update the query parameter in args
         args['q'] = self.query
@@ -83,7 +85,7 @@ class TikTokDataCollector:
         # Apify client
         self.run_apify = args['apify']
         if self.run_apify:
-            if self.user is not None:
+            if self.user is not None or self.tag is not None:
                 self.should_download_videos = args['download']
                 self.apify_client = ApifyClient(self.apify_token)
 
@@ -366,7 +368,7 @@ class TikTokDataCollector:
             'profiles': [self.user],
             'profileScrapeSections': ['videos'],
             'profileSorting': 'latest',
-            'resultsPerPage': 100,
+            'resultsPerPage': 50,
             'excludePinnedPosts': False,
             'shouldDownloadVideos': self.should_download_videos,
             'shouldDownloadCovers': True,
@@ -462,13 +464,114 @@ class TikTokDataCollector:
 
         return
     
+    def _apify_tiktok_hashtag_scraper(self) -> None:
+        '''
+        Collects hashtag data using Apify.
+        '''
+        print ('\n\nCollecting hashtag data with Apify')
+
+        # get the hashtag results
+        run_input = {
+            'hashtags': [self.tag],
+            'resultsPerPage': 25,
+            'searchSection': '/video',
+            'searchQueries': [self.tag],
+            'excludePinnedPosts': False,
+            'shouldDownloadVideos': self.should_download_videos,
+            'shouldDownloadCovers': True,
+            'shouldDownloadSubtitles': False,
+            'shouldDownloadSlideshowImages': False,
+            'shouldDownloadAvatars': True
+        }
+
+        # run the Apify actor
+        apify_actor_key = 'OtzYfK1ndEGdwWFKQ'
+        try:
+            run = self.apify_client.actor(apify_actor_key).call(
+                run_input=run_input
+            )
+
+            # store data
+            store_data = []
+            for item in self.apify_client.dataset(run['defaultDatasetId']).iterate_items():
+                store_data.append(item)
+
+            # write raw data
+            if store_data:
+                self._save_raw_data(
+                    self.output,
+                    result_type='apify_hashtag_data',
+                    data=store_data
+                )
+
+                # process data
+                self._process_apify_hashtag_data(store_data)
+            else:
+                print ('No data found in the Apify run.')
+        except httpx.LocalProtocolError as e:
+            print ('Warning: Apify API token is either missing or invalid. Skipping Apify integration.')
+        
+    def _process_apify_hashtag_data(self, data: Dict) -> None:
+        '''
+        Processes the Apify hashtag data.
+
+        :param data: A dictionary containing the Apify hashtag data.
+        '''
+        # insert data into SQL database
+        self.sql_database.insert_apify_hashtag_data(data)
+
+        # downloading images
+        thumbnails = []
+        links = []
+        for item in data:
+            try:
+                thumbnails.append(item['videoMeta']['coverUrl'])
+                links.append(item['webVideoUrl'])
+            except KeyError:
+                pass
+
+        self.http_session.start_media_download(
+            urls=thumbnails,
+            links=links,
+            output=self.output,
+            media_type='image'
+        )
+        print ('> Thumbnails downloaded')
+        
+        # get videos from Apify collected data
+        if self.should_download_videos:
+            videos = []
+            tiktok_links = []
+            for item in data:
+                try:
+                    videos.append(item['videoMeta']['downloadAddr'])
+                    tiktok_links.append(item['webVideoUrl'])
+                except KeyError:
+                    pass
+
+            # download videos
+            self.http_session.start_media_download(
+                urls=videos,
+                links=tiktok_links,
+                output=self.output,
+                media_type='video'
+            )
+            print ('> Videos downloaded')
+
+            # extract audio from videos
+            print ('> Extracting audio from videos...')
+            self.http_session.extract_audio_from_videos(self.output)
+            print ('> Done')
+
+        return
+    
     def _save_raw_data(self, output: str, result_type: str, data: Dict) -> None:
         '''
         Saves the raw data response from SerpAPI in a JSON file.
 
         :param output: The directory path where the raw data should be saved.
         :param result_type: Type of SerpAPI response: 'search_result',
-            'image_result', or 'related_content'
+            'image_result', 'related_content', or Apify response
         :param data: The raw data response from SerpAPI to be saved.
         '''
         # create the directory structure if it does not exist
@@ -500,7 +603,10 @@ class TikTokDataCollector:
         self.collect_image_results()
 
         if self.run_apify:
-            self._apify_tiktok_profile_scraper()
+            if self.user is not None:
+                self._apify_tiktok_profile_scraper()
+            elif self.tag is not None:
+                self._apify_tiktok_hashtag_scraper()
 
         print ('\n\nData collection complete.')
         print ('-' * 30)
