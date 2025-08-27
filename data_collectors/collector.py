@@ -93,6 +93,9 @@ class TikTokDataCollector:
                 self.oldest_post_date = args['oldest_post_date']
                 self.newest_post_date = args['newest_post_date']
 
+                # number of results
+                self.number_of_results = args['number_of_results']
+
         # database connection
         self.sql_database = SQLDatabaseManager(self.output, self.run_apify)
 
@@ -368,7 +371,7 @@ class TikTokDataCollector:
             'profiles': [self.user],
             'profileScrapeSections': ['videos'],
             'profileSorting': 'latest',
-            'resultsPerPage': 100,
+            'resultsPerPage': self.number_of_results,
             'excludePinnedPosts': False,
             'shouldDownloadVideos': self.should_download_videos,
             'shouldDownloadCovers': True,
@@ -473,7 +476,7 @@ class TikTokDataCollector:
         # get the hashtag results
         run_input = {
             'hashtags': [self.tag],
-            'resultsPerPage': 25,
+            'resultsPerPage': self.number_of_results,
             'searchSection': '/video',
             'searchQueries': [self.tag],
             'excludePinnedPosts': False,

@@ -224,7 +224,18 @@ def main():
         metavar='',
         help=(
             "Filter posts older than the specified date. "
-            "Format: YYYY-MM-DD."
+            "Format: YYYY-MM-DD. Default: 25"
+        )
+    )
+
+    apify_arguments.add_argument(
+        '--number-of-results',
+        type=int,
+        default=25,
+        required=False,
+        metavar='',
+        help=(
+            "Specify the number of results to return from Apify."
         )
     )
 
