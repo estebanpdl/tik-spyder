@@ -51,6 +51,17 @@ A modern, user-friendly web interface with TikTok-inspired dark theme that makes
 - 📊 **Real-time Progress**: Live progress tracking with step-by-step status updates
 
 **Launch the Interface:**
+
+**Method 1 (Recommended):**
+```sh
+# Using package installation
+tikspyder --app
+
+# Using standard installation  
+python main.py --app
+```
+
+**Method 2 (Direct):**
 ```sh
 streamlit run app.py
 ```
@@ -269,6 +280,7 @@ Optional Apify arguments:
   --number-of-results   Specify the number of results to return from Apify. Default: 25
 
 Optional arguments and parameters:
+  --app                 Launch the Streamlit web interface instead of using CLI mode.
   --use-tor             Specify whether to use Tor for downloading TikTok videos.
   -d, --download        Specify whether to download TikTok videos from SerpAPI and Apify.
   -w , --max-workers    Specify the maximum number of threads to use for downloading TikTok videos and extracting keyframes.

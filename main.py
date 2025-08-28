@@ -19,6 +19,46 @@ from data_collectors import TikTokDataCollector
 # video downloader
 from media_handlers import VideoDownloader, RequestSession
 
+def launch_streamlit_app():
+    '''Launch the Streamlit web interface'''
+    import subprocess
+    import sys
+
+    # start process
+    log_text = f'''
+    > Starting program at: {time.ctime()}
+
+    '''
+    print ('\n\n' + ' '.join(log_text.split()).strip())
+
+    print ('\n')
+    print('> Launching TikSpyder Streamlit Interface...')
+    print('<< Press Ctrl+C to stop the server >>')
+    print ('\n')
+    print('-' * 50)
+    
+    try:
+        # Launch streamlit run app.py
+        subprocess.run([
+            sys.executable, 
+            "-m", "streamlit", "run", 
+            os.path.join(os.path.dirname(__file__), 'app.py')
+        ], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f'> Failed to launch Streamlit: {e}')
+        print('> Make sure streamlit is installed: pip install streamlit')
+        sys.exit(1)
+    except KeyboardInterrupt:
+        # end process
+        print ('\n')
+        print('-' * 50)
+        log_text = f'''
+        > Ending program at: {time.ctime()}
+
+        '''
+        print ('\n\n' + ' '.join(log_text.split()).strip())
+        sys.exit(0)
+
 def main():
     # Get current working directory (where command was executed)
     execution_dir = os.getcwd()
@@ -289,8 +329,21 @@ def main():
         )
     )
 
+    ''' launch streamlit app '''
+    optional_arguments.add_argument(
+        '--app',
+        action='store_true',
+        required=False,
+        help='Launch the Streamlit web interface instead of using CLI mode.'
+    )
+
     # parse arguments
     args = vars(parser.parse_args())
+
+    # check if user wants to launch Streamlit app
+    if args.get('app'):
+        launch_streamlit_app()
+        return
 
     # validate that either a query, username or tag was provided
     if all(arg is None for arg in [args['user'], args['q'], args['tag']]):
