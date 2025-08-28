@@ -1,12 +1,11 @@
 aiohttp
 apify-client
+httpx
 pandas
 PySocks
-pytest-playwright
 requests
 serpapi
 stem
 streamlit
 tqdm
-wacz
 yt-dlp[default]
