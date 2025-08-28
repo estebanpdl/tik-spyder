@@ -3,8 +3,5 @@
 __pycache__/
 .vscode/
 
-# streamlit app
-app.py
-
 # package metadata
 *.egg-info
