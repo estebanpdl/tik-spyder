@@ -147,23 +147,20 @@ def run_collection(search_config, apify_config, collection_config, config_attrs)
                 )
                 
                 mark_step_complete(5, step_progress, f"{len(collected_videos)} videos downloaded")
-                
-                # Step 7: Extract keyframes
-                update_progress(6, overall_progress, status_text, step_progress, steps, "Extracting Keyframes...", 90)
-                
-                # Extract keyframes directly
-                try:
-                    extract_keyframes_sync(args['output'], args['max_workers'])
-                    mark_step_complete(6, step_progress, "Keyframes extracted")
-                except Exception as e:
-                    step_progress[6].markdown(f"⚠️ Keyframe extraction failed: {str(e)}")
-                    
             else:
                 mark_step_complete(5, step_progress, "No new videos to download")
-                step_progress[6].markdown(f"⏭️ Keyframe extraction skipped (no videos)")
         else:
             mark_step_complete(5, step_progress, "Video download disabled")
-            step_progress[6].markdown(f"⏭️ Keyframe extraction skipped (download disabled)")
+            
+        # Step 7: Extract keyframes from available videos
+        update_progress(6, overall_progress, status_text, step_progress, steps, "Extracting Keyframes...", 90)
+        
+        # Extract keyframes from any videos in the output directory
+        try:
+            extract_keyframes_sync(args['output'], args['max_workers'])
+            mark_step_complete(6, step_progress, "Keyframes extracted")
+        except Exception as e:
+            step_progress[6].markdown(f"⚠️ Keyframe extraction failed: {str(e)}")
         
         # Step 8: Complete
         overall_progress.progress(100)

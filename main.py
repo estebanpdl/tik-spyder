@@ -411,7 +411,10 @@ def main():
 
         # define max workers
         max_workers = args['max_workers'] if args['max_workers'] else 3
-        request_session.extract_keyframes_from_videos(output=output, max_concurrent=max_workers)
+        request_session.extract_keyframes_from_videos(
+            output=output,
+            max_concurrent=max_workers
+        )
         print ('\n')
         print ('-' * 30)
     
