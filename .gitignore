@@ -3,6 +3,9 @@
 __pycache__/
 .vscode/
 
+# data files
+tikspyder-data/
+
 # package metadata
 *.egg-info
 
